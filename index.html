@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Agda</title>
+
+    <meta charset="utf-8">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="shortcut icon" type="image/png" href="favicon.png">
+
+    <script>
+        function sessionNameFromHash () {
+            var name = document.location.hash.substring(1);
+            if(name && name.charAt(0) != "_") {
+                return name;
+            }
+            return undefined;
+        }
+    </script>
+
+    <script src="noVNC/vendor/promise.js"></script>
+    <script nomodule src="noVNC/vendor/browser-es-module-loader/dist/browser-es-module-loader.js"></script>
+
+    <script type="module" crossorigin="anonymous">
+        import RFB from "./noVNC/core/rfb.js";
+        import generateRoomWithoutSeparator from "./roomNameGenerator.js";
+
+        let sessionName = sessionNameFromHash() || generateRoomWithoutSeparator();
+
+        let rfb;
+        let screen;
+
+        function installRFB() {
+            if(screen) {
+                screen.style.display = "none";
+                document.getElementById("screens").removeChild(screen);
+            }
+
+            screen = document.createElement("div");
+            screen.className = "screen";
+            document.getElementById("screens").appendChild(screen);
+
+            let clipboardIcon = document.createElement("img");
+            clipboardIcon.src = "clipboard.svg";
+            clipboardIcon.className = "clipboard-icon";
+            clipboardIcon.onclick = function () {
+                document.getElementById("clipboard").disabled = false;
+            };
+            document.getElementById("clipboard").onchange = function () {
+                console.log("changed");
+                rfb.clipboardPasteFrom(document.getElementById("clipboard").value);
+            };
+            screen.appendChild(clipboardIcon);
+
+            let ownrfb = new RFB(screen, "wss://agda.speicherleck.de/" + sessionName);
+            rfb = ownrfb;
+
+            rfb.addEventListener("disconnect", function () {
+                if(rfb !== ownrfb) return;
+                document.getElementById("spinner").style.display = "none";
+                document.getElementById("status").style.display = "block";
+                document.getElementById("status").innerHTML = "Connection failure; reconnecting in a second&hellip;";
+                window.setTimeout(function () { location.reload() }, 1000);
+            });
+            rfb.addEventListener("connect", function () {
+                if(rfb !== ownrfb) return;
+                document.getElementById("spinner").style.display = "none";
+            });
+            rfb.addEventListener("clipboard", function (ev) {
+                if(rfb !== ownrfb) return;
+                document.getElementById("clipboard").value = ev.detail.text;
+            });
+            rfb.resizeSession = true;
+        }
+
+        installRFB();
+
+        function exitSession () {
+            rfb.blur();
+            rfb.disconnect();
+            document.getElementById("spinner").style.display = "block";
+        }
+
+        function loadSession (name) {
+            document.getElementById("info-area").style.display = "none";
+
+            if(name != sessionName) {
+                exitSession();
+                sessionName = name;
+                installRFB();
+            }
+
+            document.location.hash = "#" + sessionName;
+            document.title = sessionName + " | Agdapad";
+            screen.style.opacity = "1";
+        }
+
+        document.getElementById("button").onclick = function () {
+            loadSession(sessionName);
+        };
+
+        document.getElementById("nameform").onsubmit = function () {
+            loadSession(document.getElementById("padname").value);
+            return false;
+        };
+
+        window.addEventListener("hashchange", function () {
+            if(sessionNameFromHash()) {
+                loadSession(sessionNameFromHash());
+            } else {
+                document.getElementById("info-area").style.display = "block";
+                screen.style.opacity = 0;
+            }
+        });
+
+        if(sessionNameFromHash()) {
+            loadSession(sessionName);
+        }
+    </script>
+
+    <style>
+        /*
+            z-indices:
+
+            status:   1
+            info:     0
+            spinner: -1
+            screen:  -2
+        */
+
+        body { font-family: sans-serif; }
+
+        .screen { z-index: -2; position: absolute; left: 0; top: 0; right: 0; bottom: 0; opacity: 0; }
+
+        #info-area { padding-top: 2em; max-width: 45em; margin-left: auto; margin-right: auto; background-color: white; }
+
+        #spinner {
+            z-index: -1;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -40px;
+            margin-top: -40px;
+        }
+
+        #status {
+            z-index: 1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            background-color: #faf;
+            padding: 1em;
+            width: 30em;
+            display: none;
+        }
+
+        #_native:target { display: block; }
+        #_native {
+            display: none;
+            background-color: #faf;
+            border: 2px solid #939;
+            border-radius: 5px;
+            padding: 0 1em 0 1em;
+            margin-top: 2em;
+        }
+
+        .clipboard-icon {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            z-index: 10;
+        }
+
+        #clipboard {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 50%;
+            height: 50%;
+            background-color: #fdf;
+            border: 2px solid #939;
+            border-radius: 5px;
+        }
+        #clipboard:enabled { display: block; }
+
+        #clipboard ~ div { position: fixed; right: 0; bottom: 0; display: none; }
+        #clipboard:enabled ~ div { display: block; }
+
+        a { text-decoration: none; }
+        .logo { text-align: center; margin-bottom: 2em; }
+        .logo img { width: 40%; }
+
+        .start { text-align: center; }
+
+        .logos { text-align: center; margin-top: 3em; color: #939; }
+        .logos img { height: 4em; padding: 0.5em; }
+
+        .start input {
+            border-radius: 3px;
+            box-sizing: border-box;
+            padding: 0px 45px 0 10px;
+            width: 33%;
+            border: 1px solid #939;
+            font-size: large;
+            font-weight: bold;
+            line-height: 2em;
+            height: 2em;
+        }
+
+        #button {
+            text-shadow: 0 -1px 0 rgba(0,0,0,.8);
+            color: white;
+            border: none;
+            height: 3em;
+            width: 13em;
+            font-size: x-large;
+            font-weight: bold;
+            background: #555;
+            background: linear-gradient(#9F5F9F,#965696 50%,#9C4C9C 51%,#973797);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.9);
+            margin-bottom: 1em;
+        }
+        #button:hover {
+            cursor: pointer;
+            background: #666;
+            background: linear-gradient(#AF6FAF,#A666A6 50%,#AC5CAC 51%,#A747A7);
+        }
+
+        label { display: block; }
+        button[type="submit"] { height: 2em; font-size: large; width: 70px; padding: 0; }
+    </style>
+
+    <link rel="stylesheet" href="spinner.css">
+</head>
+
+<body>
+
+<div id="screens">
+</div>
+
+<div id="spinner">
+    <div class="lds-grid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+</div>
+
+<div id="status">
+</div>
+
+<form>
+    <textarea id="clipboard" placeholder="The contents of this box are synchronized with the clipboard on the server. Text copied in Emacs shows up here, and text entered here can be pasted in Emacs." disabled></textarea>
+    <div>
+        <input type="reset" value="Clear"></input>
+        <input type="button" id="clipboard-dismiss" onclick="document.getElementById('clipboard').disabled = true; return false;" value="Dismiss">
+    </div>
+</form>
+
+<div id="info-area">
+    <script>
+        if(sessionNameFromHash()) {
+            document.getElementById("info-area").style.display = "none";
+        }
+    </script>
+
+    <div class="logo"><img src="hen.png"></div>
+
+    <div class="start">
+        <button id="button">New Agda session</button>
+
+        <label id="label" for="padname">or create/open Agda session with name:</label>
+        <form id="nameform">
+            <input type="text" id="padname" maxlength="50">&nbsp;<button type="submit">Ok</button>
+        </form>
+    </div>
+
+    <noscript>
+        This page requires JavaScript to connect to a VNC server, however you
+        can also use a <a href="#_native">native VNC viewer</a>.
+    </noscript>
+
+    <div class="logos">
+        <p><a href="https://wiki.portal.chalmers.se/agda/">Agda</a> is a
+        dependently typed functional programming language and a proof
+        assistant.
+        You can also use a <a href="#_native">native VNC viewer</a> instead of
+        this in-browser viewer.
+        This online version of Agda was made by <a
+        href="https://www.ingo-blechschmidt.eu/">Ingo Blechschmidt</a>,
+        building on awesome free technology:</p>
+        <a href="https://www.linux.org/"><img src="logos/linux.svg"></a>
+        <a href="https://www.gnu.org/"><img src="logos/gnu.svg"></a>
+        <a href="https://perl.org/"><img src="logos/perl.svg"></a>
+        <a href="https://nixos.org/"><img src="logos/nixos.svg"></a>
+        <a href="https://tigervnc.org/"><img src="logos/tigervnc.svg"></a>
+        <a href="https://novnc.com/"><img src="logos/novnc.svg"></a>
+        <a href="https://systemd.io/"><img src="logos/systemd.svg"></a>
+    </div>
+
+    <div id="_native">
+        <h2>Using a native VNC viewer</h2>
+        <p>Simply direct your favorite VNC viewer to the address
+        <code>wss://agdapad.quasicoherent.io/<em>SessionName</em></code>.</p>
+        <p>However, most
+        VNC clients do not support the WebSocket protocol, the <a
+        href="https://novnc.com/">noVNC client</a> being a notable
+        exception.</p>
+        <p>If you are under Linux, then you can use <a
+        href="https://github.com/vi/websocat">websocat</a> (packaged for most
+        Linux distributions) to set up a standard TCP proxy for the WebSocket
+        server:</p>
+        <ol>
+            <li>Run <code>websocat tcp-l:127.0.0.1:5901
+            wss://agdapad.quasicoherent.io/<em>SessionName</em></code>.</li>
+            <li>Direct your VNC viewer to <code>localhost:1</code>.</li>
+        </ol>
+    </div>
+</div>
+
+</body>
+</html>
