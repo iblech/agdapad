@@ -2,3 +2,4 @@
 * bundle and minify JS
 * upload and download
 * timeout
+* virtual keypad on mobile

@@ -15,7 +15,7 @@
     <script>
         function sessionNameFromHash () {
             var name = document.location.hash.substring(1);
-            if(name && name.charAt(0) != "_") {
+            if(name && !(name.charAt(0) == "_" && name.charAt(1) == "_")) {
                 return name.replace(/[^\w]/g, "_");
             }
             return undefined;
@@ -282,7 +282,7 @@
         dependently typed functional programming language and a proof
         assistant.
         You can also use a <a href="#_native">native VNC viewer</a> instead of
-        this in-browser viewer. <a href="#_more">Learn more about this
+        this in-browser viewer. <a href="#__info">Learn more about this
         project.</a>
         This online version of Agda was made by <a
         href="https://www.ingo-blechschmidt.eu/">Ingo Blechschmidt</a> for an
@@ -297,7 +297,7 @@
         <a href="https://systemd.io/"><img src="images/logos/systemd.svg"></a>
     </div>
 
-    <div id="_more" class="subpage">
+    <div id="__info" class="subpage">
         <h2>About Agdapad</h2>
         <p>This page connects you to a remote server, on which an Emacs
         instance is spawned for you. The purpose of Agdapad is to lower the bar
@@ -319,7 +319,7 @@
         <p>A NixOS package for self-hosting this server <a
         href="https://www.github.com/iblech/agdapad">will be available in the
         next couple of days</a> (AGPL-licensed). You can also access this
-        server <a href="#_native">using a native VNC viewer</a>.</p>
+        server <a href="#__native">using a native VNC viewer</a>.</p>
 
         <h2>Installing Agda on your local computer</h2>
         <p>For larger experiments, Agda is more fun if you install it locally
@@ -341,7 +341,7 @@
         Germany</p>
       </div>
 
-    <div id="_native" class="subpage">
+    <div id="__native" class="subpage">
         <h2>Using a native VNC viewer</h2>
         <p>Simply direct your favorite VNC viewer to the address
         <code>wss://agdapad.quasicoherent.io/<em>SessionName</em></code>.</p>
