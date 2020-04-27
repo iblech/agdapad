@@ -71,6 +71,9 @@
                 if(rfb !== ownrfb) return;
                 document.getElementById("spinner").style.display = "none";
                 document.getElementById("clipboard-icon").style.visibility = "visible";
+                if(document.getElementById("info-area").className == "hidden") {
+                    rfb.focus();
+                }
             });
             rfb.addEventListener("clipboard", function (ev) {
                 if(rfb !== ownrfb) return;
@@ -99,6 +102,10 @@
             document.location.hash = "#" + sessionName;
             document.title = sessionName + " | Agdapad";
             screen.style.opacity = "1";
+
+            // We focus the RFB in the connect handler only if the info area is
+            // not visible, hence we have to do it here again.
+            rfb.focus();
         }
 
         document.getElementById("button").onclick = function () {
@@ -121,6 +128,8 @@
 
         if(sessionNameFromHash()) {
             loadSession(sessionName);
+        } else {
+            document.getElementById("padname").focus();
         }
     </script>
 
