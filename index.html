@@ -209,6 +209,8 @@
         #clipboard ~ div { position: fixed; right: 0; bottom: 0; display: none; }
         #clipboard:enabled ~ div { display: block; }
 
+        .noscript { color: #f05; font-weight: bold; margin-top: 2em; }
+
         a { text-decoration: none; }
         .logo { text-align: center; margin-bottom: 2em; }
         .logo img { width: 40%; }
@@ -284,12 +286,13 @@
         <form id="nameform">
             <input type="text" id="padname" maxlength="50">&nbsp;<button type="submit">Ok</button>
         </form>
-    </div>
 
-    <noscript>
-        This page requires JavaScript to connect to a VNC server, however you
-        can also use a <a href="#_native">native VNC viewer</a>.
-    </noscript>
+        <noscript>
+            <p class="noscript">This page requires JavaScript to connect to a
+            VNC server. If you cannot or don't like to activate JavaScript, you
+            can also use a <a href="#__native">native VNC viewer</a>.</p>
+        </noscript>
+    </div>
 
     <div class="logos">
         <p><a href="https://wiki.portal.chalmers.se/agda/">Agda</a> is a
