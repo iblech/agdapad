@@ -16,7 +16,7 @@
         function sessionNameFromHash () {
             var name = document.location.hash.substring(1);
             if(name && name.charAt(0) != "_") {
-                return name;
+                return name.replace(/[^\w]/g, "_");
             }
             return undefined;
         }
@@ -101,7 +101,7 @@
         };
 
         document.getElementById("nameform").onsubmit = function () {
-            loadSession(document.getElementById("padname").value);
+            loadSession(document.getElementById("padname").value.replace(/[^\w]/g, "_"));
             return false;
         };
 
