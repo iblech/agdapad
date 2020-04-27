@@ -52,7 +52,7 @@
                 rfb.clipboardPasteFrom(document.getElementById("clipboard").value);
             };
 
-            let ownrfb = new RFB(screen, "wss://agda.speicherleck.de/" + sessionName);
+            let ownrfb = new RFB(screen, "wss://agdapad.quasicoherent.io/" + sessionName);
             rfb = ownrfb;
 
             rfb.addEventListener("disconnect", function () {
