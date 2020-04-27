@@ -46,10 +46,15 @@
 
             document.getElementById("clipboard-icon").onclick = function () {
                 document.getElementById("clipboard").disabled = false;
+                document.getElementById("clipboard").focus();
             };
             document.getElementById("clipboard").onchange = function () {
-                console.log("changed");
                 rfb.clipboardPasteFrom(document.getElementById("clipboard").value);
+            };
+            document.getElementById("clipboard").onkeyup = function (ev) {
+                if(ev.keyCode == 27) {
+                    document.getElementById("clipboard").disabled = true;
+                }
             };
 
             let ownrfb = new RFB(screen, "wss://agdapad.quasicoherent.io/" + sessionName);
