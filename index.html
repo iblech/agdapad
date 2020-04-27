@@ -158,10 +158,10 @@
             display: none;
         }
 
-        #_native:target { display: block; }
-        #_native {
+        .subpage:target { display: block; }
+        .subpage {
             display: none;
-            background-color: #faf;
+            background-color: #fef;
             border: 2px solid #939;
             border-radius: 5px;
             padding: 0 1em 0 1em;
@@ -282,7 +282,8 @@
         dependently typed functional programming language and a proof
         assistant.
         You can also use a <a href="#_native">native VNC viewer</a> instead of
-        this in-browser viewer.
+        this in-browser viewer. <a href="#_more">Learn more about this
+        project.</a>
         This online version of Agda was made by <a
         href="https://www.ingo-blechschmidt.eu/">Ingo Blechschmidt</a>,
         building on awesome free technology:</p>
@@ -295,18 +296,60 @@
         <a href="https://systemd.io/"><img src="images/logos/systemd.svg"></a>
     </div>
 
-    <div id="_native">
+    <div id="_more" class="subpage">
+        <h2>About Agdapad</h2>
+        <p>This page connects you to a remote server, on which an Emacs
+        instance is spawned for you. The purpose of Agdapad is to lower the bar
+        for playing with Agda, as a local installation becomes superfluous, and
+        to allow live collaboration on small Agda projects. Agdapad was built
+        to facilitate an Agda course at the <a
+        href="https://www.unipd.it/en/dm">University of Padova</a>.</p>
+
+        <h2>Server concerns</h2>
+        <p>The server is not very well-equipped, hence please be mindful of
+        your resource usage. You do not need to quit Emacs when leaving this
+        page, but please do terminate Agda or quit Emacs in case Agda is taking
+        an extraordinate amount of time.</p>
+        <p>This service is provided free of charge and comes without any guarantees.
+        It might vanish at any point. Your Agda programs are stored on the
+        server, unencrypted, but no personal data is recorded. Please <a
+        href="mailto:iblech@speicherleck.de">notify me</a> with any security
+        concerns you discover.</p>
+        <p>A NixOS package for self-hosting this server <a
+        href="https://www.github.com/iblech/agdapad">will be available in the
+        next couple of days</a> (AGPL-licensed). You can also access this
+        server <a href="#_native">using a native VNC viewer</a>.</p>
+
+        <h2>Installing Agda on your local computer</h2>
+        <p>For larger experiments, Agda is more fun if you install it locally
+        on your computer. Instructions are available <a
+        href="https://agda.readthedocs.io/en/latest/getting-started/index.html">at
+        the Agda wiki</a>. Unfortunately the installation process it not
+        entirely straightforward, especially on Windows. For this reason you
+        can also download an “all batteries included” <a href="">system
+        image</a> and run it as a virtual machine using, for instance, <a
+        href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a>. Albeit
+        a bit heavy, this is the simplest way to get going.</p>
+
+        <h2>Contact</h2>
+        <p>Ingo Blechschmidt<br>
+        <a href="mailto:iblech@speicherleck.de">iblech@speicherleck.de</a><br>
+        <a href="tel:+4917695110311">+49 176 95110311</a><br>
+        Arberstr. 5<br>
+        86179 Augsburg<br>
+        Germany</p>
+      </div>
+
+    <div id="_native" class="subpage">
         <h2>Using a native VNC viewer</h2>
         <p>Simply direct your favorite VNC viewer to the address
         <code>wss://agdapad.quasicoherent.io/<em>SessionName</em></code>.</p>
         <p>However, most
         VNC clients do not support the WebSocket protocol, the <a
         href="https://novnc.com/">noVNC client</a> being a notable
-        exception.</p>
-        <p>If you are under Linux, then you can use <a
-        href="https://github.com/vi/websocat">websocat</a> (packaged for most
-        Linux distributions) to set up a standard TCP proxy for the WebSocket
-        server:</p>
+        exception. Hence you need to setup a TCP proxy; on Linux,
+        <a href="https://github.com/vi/websocat">websocat</a> (packaged for most
+        Linux distributions) can do this for you:</p>
         <ol>
             <li>Run <code>websocat tcp-l:127.0.0.1:5901
             wss://agdapad.quasicoherent.io/<em>SessionName</em></code>.</li>
