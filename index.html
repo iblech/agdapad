@@ -44,17 +44,13 @@
             screen.className = "screen";
             document.getElementById("screens").appendChild(screen);
 
-            let clipboardIcon = document.createElement("img");
-            clipboardIcon.src = "clipboard.svg";
-            clipboardIcon.className = "clipboard-icon";
-            clipboardIcon.onclick = function () {
+            document.getElementById("clipboard-icon").onclick = function () {
                 document.getElementById("clipboard").disabled = false;
             };
             document.getElementById("clipboard").onchange = function () {
                 console.log("changed");
                 rfb.clipboardPasteFrom(document.getElementById("clipboard").value);
             };
-            screen.appendChild(clipboardIcon);
 
             let ownrfb = new RFB(screen, "wss://agda.speicherleck.de/" + sessionName);
             rfb = ownrfb;
@@ -69,6 +65,7 @@
             rfb.addEventListener("connect", function () {
                 if(rfb !== ownrfb) return;
                 document.getElementById("spinner").style.display = "none";
+                document.getElementById("clipboard-icon").style.visibility = "visible";
             });
             rfb.addEventListener("clipboard", function (ev) {
                 if(rfb !== ownrfb) return;
@@ -86,7 +83,7 @@
         }
 
         function loadSession (name) {
-            document.getElementById("info-area").style.display = "none";
+            document.getElementById("info-area").className = "hidden";
 
             if(name != sessionName) {
                 exitSession();
@@ -112,7 +109,7 @@
             if(sessionNameFromHash()) {
                 loadSession(sessionNameFromHash());
             } else {
-                document.getElementById("info-area").style.display = "block";
+                document.getElementById("info-area").className = "";
                 screen.style.opacity = 0;
             }
         });
@@ -137,6 +134,7 @@
         .screen { z-index: -2; position: absolute; left: 0; top: 0; right: 0; bottom: 0; opacity: 0; }
 
         #info-area { padding-top: 2em; max-width: 45em; margin-left: auto; margin-right: auto; background-color: white; }
+        .hidden { display: none; }
 
         #spinner {
             z-index: -1;
@@ -170,12 +168,15 @@
             margin-top: 2em;
         }
 
-        .clipboard-icon {
+        #clipboard-icon {
             position: fixed;
             right: 0;
             bottom: 0;
-            z-index: 10;
+            z-index: -1;
+            visibility: hidden;
+            display: none;
         }
+        #info-area[class="hidden"] ~ form #clipboard-icon { display: block; }
 
         #clipboard {
             display: none;
@@ -190,6 +191,7 @@
         }
         #clipboard:enabled { display: block; }
 
+        #clipboard:enabled ~ img { display: none; }
         #clipboard ~ div { position: fixed; right: 0; bottom: 0; display: none; }
         #clipboard:enabled ~ div { display: block; }
 
@@ -252,18 +254,10 @@
 <div id="status">
 </div>
 
-<form>
-    <textarea id="clipboard" placeholder="The contents of this box are synchronized with the clipboard on the server. Text copied in Emacs shows up here, and text entered here can be pasted in Emacs." disabled></textarea>
-    <div>
-        <input type="reset" value="Clear"></input>
-        <input type="button" id="clipboard-dismiss" onclick="document.getElementById('clipboard').disabled = true; return false;" value="Dismiss">
-    </div>
-</form>
-
 <div id="info-area">
     <script>
         if(sessionNameFromHash()) {
-            document.getElementById("info-area").style.display = "none";
+            document.getElementById("info-area").className = "hidden";
         }
     </script>
 
@@ -320,6 +314,15 @@
         </ol>
     </div>
 </div>
+
+<form>
+    <textarea id="clipboard" placeholder="The contents of this box are synchronized with the clipboard on the server. Text copied in Emacs shows up here, and text entered here can be pasted in Emacs." disabled></textarea>
+    <img src="icons/clipboard.svg" id="clipboard-icon">
+    <div>
+        <input type="reset" value="Clear"></input>
+        <input type="button" id="clipboard-dismiss" onclick="document.getElementById('clipboard').disabled = true; return false;" value="Dismiss">
+    </div>
+</form>
 
 </body>
 </html>
