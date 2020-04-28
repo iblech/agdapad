@@ -1,4 +1,3 @@
-* tty access
 * bundle and minify JS
 * upload and download
 * timeout
