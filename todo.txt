@@ -3,3 +3,5 @@
 * upload and download
 * timeout
 * virtual keypad on mobile
+* prepare system image
+* ssh access
