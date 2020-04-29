@@ -121,6 +121,9 @@
         };
 
         document.getElementById("tty-link").onclick = function () {
+            if(document.getElementById("padname").value !== "") {
+                sessionName = document.getElementById("padname").value.replace(/[^\w]/g, "_");
+            }
             window.location.href = "tty/#" + sessionName;
             return false;
         };
