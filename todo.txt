@@ -4,3 +4,4 @@
 * virtual keypad on mobile
 * prepare system image
 * ssh access
+* document viewonly mode

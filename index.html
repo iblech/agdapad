@@ -16,7 +16,7 @@
         function sessionNameFromHash () {
             var name = document.location.hash.substring(1);
             if(name && !(name.charAt(0) == "_" && name.charAt(1) == "_")) {
-                return name.replace(/[^\w]/g, "_");
+                return name.replace(/[^\w\/]/g, "_");
             }
             return undefined;
         }
@@ -82,7 +82,14 @@
                 if(rfb !== ownrfb) return;
                 document.getElementById("clipboard").value = ev.detail.text;
             });
-            rfb.resizeSession = true;
+
+            if(sessionName.match(/\/viewonly/)) {
+                rfb.viewOnly = true;
+                rfb.scaleViewport = true;
+                rfb.showDotCursor = true;
+            } else {
+                rfb.resizeSession = true;
+            }
         }
 
         installRFB();
