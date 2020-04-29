@@ -64,8 +64,11 @@
                 if(rfb !== ownrfb) return;
                 document.getElementById("spinner").style.display = "none";
                 document.getElementById("status").style.display = "block";
-                document.getElementById("status").innerHTML = "Connection failure; reconnecting in a second&hellip;";
-                window.setTimeout(function () { location.reload() }, 1000);
+                let st = document.getElementById("status");
+                st.innerHTML = "Connection failure; reconnecting in three seconds&hellip;";
+                window.setTimeout(function () { st.innerHTML = "Connection failure; reconnecting in two seconds&hellip;"; }, 1000);
+                window.setTimeout(function () { st.innerHTML = "Connection failure; reconnecting in one second&hellip;"; }, 2000);
+                window.setTimeout(function () { location.reload() }, 3000);
             });
             rfb.addEventListener("connect", function () {
                 if(rfb !== ownrfb) return;
