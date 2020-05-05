@@ -1,10 +1,10 @@
 ErrorDocument 401 /401.html
 
-AuthType Basic
-AuthName "Unfortunately, Agdapad is closed for the general public to ensure that an Agda course in Padova can run smoothly. Agdapad will be back at 15:00 UTC."
-AuthUserFile /var/www/iblech/.agdapad/.htpasswd
-require valid-user
-<FilesMatch "\.(png|svg)$">
-  Satisfy Any
-  Allow from all
-</FilesMatch>
+#AuthType Basic
+#AuthName "Unfortunately, Agdapad is closed for the general public to ensure that an Agda course in Padova can run smoothly. Agdapad will be back at 15:00 UTC."
+#AuthUserFile /var/www/iblech/.agdapad/.htpasswd
+#require valid-user
+#<FilesMatch "\.(png|svg)$">
+#  Satisfy Any
+#  Allow from all
+#</FilesMatch>
