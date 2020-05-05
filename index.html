@@ -141,8 +141,10 @@
             } else {
                 document.getElementById("info-area").className = "";
                 rfb.blur();
-                document.getElementById("padname").focus();
                 screen.style.opacity = 0;
+                if(! document.location.hash.match(/^#__/)) {
+                    document.getElementById("padname").focus();
+                }
             }
         });
 
