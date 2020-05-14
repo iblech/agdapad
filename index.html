@@ -56,6 +56,7 @@
                     document.getElementById("clipboard").disabled = true;
                 }
             };
+            document.getElementById("clipboard").placeholder = "Connection to https://agdapad.quasicoherent.io/#" + sessionName + " established. The contents of this box are synchronized with the clipboard on the server. Text copied in Emacs shows up here, and text entered here can be pasted in Emacs.";
 
             let ownrfb = new RFB(screen, "wss://agdapad.quasicoherent.io/" + sessionName);
             rfb = ownrfb;
@@ -412,7 +413,7 @@
 </div>
 
 <form>
-    <textarea id="clipboard" placeholder="The contents of this box are synchronized with the clipboard on the server. Text copied in Emacs shows up here, and text entered here can be pasted in Emacs." disabled></textarea>
+    <textarea id="clipboard" disabled></textarea>
     <img src="images/clipboard.svg" id="clipboard-icon">
     <div>
         <input type="reset" value="Clear"></input>
