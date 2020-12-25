@@ -236,7 +236,7 @@
 
         a { text-decoration: none; }
         .logo { text-align: center; margin-bottom: 2em; }
-        .logo img { width: 40%; }
+        .logo img { width: 40%; height: auto; aspect-ratio: attr(width) / attr(height); }
 
         .start { text-align: center; }
 
@@ -302,7 +302,7 @@
         }
     </script>
 
-    <div class="logo"><img src="images/hen.svg"></div>
+    <div class="logo"><img src="images/hen.svg" width="425" height="332"></div>
 
     <div class="start">
         <button id="button">New Agda session</button>
