@@ -124,7 +124,11 @@
         };
 
         document.getElementById("nameform").onsubmit = function () {
-            loadSession(document.getElementById("padname").value.replace(/[^\w]/g, "_"));
+            if(document.getElementById("padname").value !== "") {
+                loadSession(document.getElementById("padname").value.replace(/[^\w]/g, "_"));
+            } else {
+                loadSession(sessionName);
+            }
             return false;
         };
 
