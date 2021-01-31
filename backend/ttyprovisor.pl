@@ -76,7 +76,7 @@ sub nsenter {
   return qw< nsenter -a -t >, $pid;
 }
 
-# Check whether a VNC connection can be established to the given machine.
+# Check whether a machine is running (we can enter its namespace).
 sub is_living {
   my $id = shift;
 
@@ -131,8 +131,6 @@ sub clean_obsolete_machines {
 }
 
 # Acquire a container for a given session name.
-# Repurposes one of the available hot spares if possible; else spawns a new
-# container.
 # Assumes that $ROOT/sessions/$session already exists, that is that we feel
 # responsible for setting up a container for $session.
 sub acquire_session {

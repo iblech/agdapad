@@ -115,7 +115,7 @@ sub setup_cold_spares {
 
 # Terminate idle sessions (not any hot or cold spares, of course).
 sub terminate_idle_sessions {
-  # the glob() won't return sessions hot or cold spares, as these begin with a dot
+  # the glob() won't return sessions of hot or cold spares, as these begin with a dot
   for my $machine (glob "$ROOT/sessions/*/*") {
     next if $machine =~ /off/;
 
