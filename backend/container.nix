@@ -158,7 +158,7 @@ in {
         networking.firewall.enable = false;
 
         environment.systemPackages = with pkgs; [
-          bash tmux vim myemacs-nox myagda
+          bash perl tmux vim myemacs-nox myagda
         ];
 
         programs.bash.enableCompletion = false;
