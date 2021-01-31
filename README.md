@@ -56,18 +56,18 @@ of Linux will be forthcoming.
    them UID 10000.
 3. Add this to your `/etc/nixos/configuration.nix`:
 
-    users.users.guest = { isNormalUser = true; description = "Guest"; home = "/agdapad-homes"; uid = 10000; };
-    containers.box = {
-      config =
-        {config, pkgs, ...}:
-        { imports = [ /tmp-iblech/agdapad/backend/container.nix ]; };
-      ephemeral = true;
-      autoStart = true;
-      privateNetwork = true;
-      hostAddress = "192.168.0.1";
-      localAddress = "192.168.0.2";
-      bindMounts = { "/home" = { hostPath = "/agdapad-homes"; isReadOnly = false; }; };
-    };
+       users.users.guest = { isNormalUser = true; description = "Guest"; home = "/agdapad-homes"; uid = 10000; };
+       containers.box = {
+         config =
+           {config, pkgs, ...}:
+           { imports = [ /tmp-iblech/agdapad/backend/container.nix ]; };
+         ephemeral = true;
+         autoStart = true;
+         privateNetwork = true;
+         hostAddress = "192.168.0.1";
+         localAddress = "192.168.0.2";
+         bindMounts = { "/home" = { hostPath = "/agdapad-homes"; isReadOnly = false; }; };
+       };
 4. Switch to the new configuration.
 
 
