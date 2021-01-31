@@ -9,8 +9,8 @@
 * Hot spares for fresh sessions (with emacs already prestarted)
 * Cold spares for already existing sessions (with X, but not emacs, already
   prestarted)
-* Robust container startup -- people accessing the same Agdapad URL
-  will be connected to the same session
+* Robust container acquisition – people accessing the same Agdapad URL
+  will be connected to the same session even in case of bad timing
 * Löb-like nested containers
 * Building on awesome open source technology: GNU/Linux, Perl, NixOS, TigerVNC,
   NoVNC, systemd
@@ -26,23 +26,25 @@ of Linux will be forthcoming.
 
 ## Instructions for a quick non-permanent setup
 
-    # Create the container
-    nixos-container create box --config-file ./container.nix
+1. Create and start the container:
 
-    # Start the container
-    nixos-container start box
+       $ nixos-container create box --config-file ./container.nix
+       $ nixos-container start box
 
-    # Inside the container, create the directory `/home/.skeleton` so that the
-    # scripts know that everything has been correctly set up. Files put in that
-    # directory are copied into the home directory of newly-created sessions.
-    machinectl shell box mkdir /home/.skeleton
+2. Inside the container, create the directory `/home/.skeleton` so that the
+   scripts know that everything has been correctly set up. Files put in that
+   directory are copied into the home directory of newly-created sessions.
 
-    # That's it. Test that text-mode access works:
-    xdg-open http://box:7681/?arg=CuriousSessionName
+       $ machinectl shell box mkdir /home/.skeleton
 
-    # Test that graphical access works:
-    websocat --binary tcp-l:127.0.0.1:5901 ws://box:6080/CuriousSessionName &
-    vncviewer localhost:1
+3. That's it. Test that text-mode access works:
+
+       $ xdg-open http://box:7681/?arg=CuriousSessionName
+
+    Test that graphical access works:
+
+       $ websocat --binary tcp-l:127.0.0.1:5901 ws://box:6080/CuriousSessionName &
+       $ vncviewer localhost:1
 
 
 ## Instructions for a permanent setup
