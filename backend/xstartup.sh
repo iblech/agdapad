@@ -1,4 +1,4 @@
-#!${pkgs.bash}/bin/bash
+#!/usr/bin/env bash
 
 . /etc/profile
 cd
@@ -13,17 +13,14 @@ if [ -e .wait ]; then
   cp $tempdir/.* .
 fi
 
-mkdir -p .agda
-echo "standard-library" > .agda/defaults
-echo "cubical" >> .agda/defaults
-echo "agda-categories" >> .agda/defaults
-cat ${emacsrc} > .emacs
+cp --no-preserve=mode -nrT @out@/skeleton-home .
 
 [ -x .xstartup ] && . .xstartup
 
-${mydwm}/bin/dwm &
-exec ${myemacs}/bin/emacs --fullscreen hello.agda
+dwm &
+exec emacs --fullscreen hello.agda
 
+# alternative: launch a full desktop environment
 eval $(dbus-launch --exit-with-session --sh-syntax)
 systemctl --user import-environment DISPLAY XAUTHORITY
 dbus-update-activation-environment DISPLAY XAUTHORITY

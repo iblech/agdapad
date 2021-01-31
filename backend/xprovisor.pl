@@ -1,11 +1,14 @@
-#!${pkgs.perl}/bin/perl
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
 use Time::HiRes;
 
-my $ROOT               = "/root/tty";
+my $ROOT               = "/root/x";
+my $NUM_HOT_SPARES     = 3;
+my $NUM_COLD_SPARES    = 1;
 my $NUM_TOTAL_SESSIONS = 100_000;
+my $MAX_IDLE_TIME      = 600 * 1000;  # for the time being
 
 mkdir $ROOT;
 die unless -d $ROOT;
@@ -40,8 +43,8 @@ sub create_session {
       cp -Ta --reflink=auto /home/.skeleton /home/$session
       chown 10000 /home/$session
     fi
-    < ttyskeleton.conf sed -e 's+/home/\.skeleton+/home/$session+g' > ttybox-$id.conf
-    systemctl start container\@ttybox-$id.service
+    < xskeleton.conf sed -e 's+/home/\.skeleton+/home/$session+g' > xbox-$id.conf
+    systemctl start container\@xbox-$id.service
   ") == 0 or die;
 
   sleep 0.1 until is_living($id);
@@ -62,18 +65,18 @@ sub get_leader {
 
   return if $id =~ /off/;
 
-  my $resp = `${pkgs.systemd}/bin/machinectl show ttybox-$id -p Leader`;
+  my $resp = `machinectl show xbox-$id -p Leader`;
   $resp =~ /^Leader=(\d+)$/ and return $1;
   return;
 }
 
-# Assemble the nsenter command for connecting to the VNC session of the given
+# Assemble the netcat command for connecting to the VNC session of the given
 # machine, adressed by the PID of its leader process.
-sub nsenter {
+sub netcat {
   my $pid = shift;
   die unless $pid;
 
-  return (qw< ${pkgs.utillinux}/bin/nsenter -a -t >, $pid);
+  return qw< nsenter -a -t >, $pid, qw< nc localhost 5901 >;
 }
 
 # Check whether a VNC connection can be established to the given machine.
@@ -82,12 +85,37 @@ sub is_living {
 
   return if $id =~ /off/;
   return unless my $pid = get_leader($id);
-  return $pid if system(nsenter($pid), "${pkgs.coreutils}/bin/true") == 0;
+  return $pid if system("@{[ netcat($pid) ]} -z &>/dev/null") == 0;
   return;
+}
+
+# Spawn sufficiently many hot spares.
+sub setup_hot_spares {
+  until((() = glob "$ROOT/sessions/.hot-spare-*/*") >= $NUM_HOT_SPARES) {
+    my $id = allocate_machine();
+    system("rm", "-rf", "/home/.hot-spare-$id") == 0 or die;
+    create_session(".hot-spare-$id", $id);
+  }
+}
+
+# Spawn sufficiently many cold spares.
+sub setup_cold_spares {
+  until((() = glob "$ROOT/sessions/.cold-spare-*/*") >= $NUM_COLD_SPARES) {
+    my $id = allocate_machine();
+    system("
+      set -e
+      umount /home/.cold-spare-$id || true
+      mkdir -p /home/.cold-spare-$id
+      mount -t tmpfs none /home/.cold-spare-$id
+      mkfifo /home/.cold-spare-$id/.wait
+    ") == 0 or die;
+    create_session(".cold-spare-$id", $id);
+  }
 }
 
 # Terminate idle sessions (not any hot or cold spares, of course).
 sub terminate_idle_sessions {
+  # the glob() won't return sessions hot or cold spares, as these begin with a dot
   for my $machine (glob "$ROOT/sessions/*/*") {
     next if $machine =~ /off/;
 
@@ -102,29 +130,41 @@ sub terminate_idle_sessions {
       next;
     }
 
-    my $idle = system(nsenter($pid), "${pkgs.perl}/bin/perl", "-e", '
-      my @sockets = glob "/tmp/tmux-*/*";
-      exit 0 if @sockets;
-      exit 1;
-    ');
-    if($idle) {
+    my $idletime = `nsenter -a -t $pid /usr/bin/env DISPLAY=:1 XAUTHORITY=/home/guest/.Xauthority xprintidle-ng`;
+    if(not $idletime =~ /^\d+$/ or $idletime > $MAX_IDLE_TIME) {
       warn "* Session $machine is idle, terminating...\n";
       rename($machine, $machine . "off");
-      system("${pkgs.systemd}/bin/machinectl", "shell", "ttybox-$id", "${pkgs.systemd}/bin/poweroff");
+      system("machinectl", "shell", "xbox-$id", "poweroff");
       mkdir "$ROOT/clean";
       mkdir "$ROOT/clean/$id";
     }
   }
 }
 
-# Clean obsolete machines.
+# Reset the idletime of a session.
+# Used when employing a hot or cold spare. For the most time, spares sit
+# unused and accumulate idletime. They are not killed because
+# terminate_idle_sessions purposely skips over spares. However, as soon as
+# they are employed, the idletime killer might kill them.
+sub reset_idletime {
+  my $id = shift;
+
+  my $pid = get_leader($id) or return;
+  return system(qw<
+    nsenter -a -t>, $pid, qw<
+    /usr/bin/env DISPLAY=:1 XAUTHORITY=/home/guest/.Xauthority
+    xdotool mousemove 0 0 mousemove restore
+  >) == 0;
+}
+
+# Clean obsolete machines
 sub clean_obsolete_machines {
   for my $id (glob "$ROOT/clean/*") {
     $id = (split "/", $id)[-1];
 
     unless(get_leader($id)) {
       warn "* Machine $id has stopped; cleaning its files.\n";
-      system("${pkgs.coreutils}/bin/rm", "-rf", "/var/lib/containers/ttybox-$id");
+      system("rm", "-rf", "/var/lib/containers/xbox-$id");
       rmdir "$ROOT/clean/$id";
     }
   }
@@ -140,6 +180,47 @@ sub acquire_session {
 
   warn "* Acquiring a container for $session...\n";
 
+  # Carry out one attempt of acquiring a hot spare.
+  if(not -d "/home/$session" and my $hot_spare = (glob "$ROOT/sessions/.hot-spare-*/*")[0]) {
+    my $id = (split "/", $hot_spare)[-1];
+    warn "  Trying to use hot spare $id...\n";
+
+    # The following rename can fail for two reasons.
+    # (1) The hot spare might have vanished in the meantime.
+    # (2) The home directory might have come into existence.
+    if(rename("/home/.hot-spare-$id", "/home/$session")) {
+      warn "  Success, using hot spare $id.\n";
+      reset_idletime($id);
+      rename($hot_spare, "$ROOT/sessions/$session/$id") or die;
+      rmdir("$ROOT/sessions/.hot-spare-$id");
+      return $id;
+    } else {
+      warn "  Failure, not using a hot spare.\n";
+    }
+  }
+
+  # Carry out one attempt of acquiring a cold spare.
+  if(-d "/home/$session" and my $cold_spare = (glob "$ROOT/sessions/.cold-spare-*/*")[0]) {
+    my $id = (split "/", $cold_spare)[-1];
+    warn "  Trying to use cold spare $id...\n";
+
+    # The following rename can fail for one reason:
+    # (1) The cold spare might have vanished in the meantime
+    #     (for instance purposed for a different session).
+    if(rename($cold_spare, "$ROOT/sessions/$session/$id")) {
+      warn "  Success, using cold spare $id.\n";
+      rmdir("$ROOT/sessions/.cold-spare-$id") or die;
+      reset_idletime($id);
+      open my $fh, ">", "/home/.cold-spare-$id/.wait" or die;
+      system("mount --bind /home/$session /home/.cold-spare-$id") == 0 or die;
+      print $fh "now\n" or die;
+      close $fh or die;
+      return $id;
+    } else {
+      warn "  Failure, not using a cold spare.\n";
+    }
+  }
+
   return create_session($session);
 }
 
@@ -148,13 +229,15 @@ unless(-d "/home/.skeleton") {
   exit 1;
 }
 
-if(defined $ARGV[0] and $ARGV[0] =~ /^\.maintainance/) {
+if($ENV{WEBSOCAT_URI} =~ /\?maintainance/) {
+  setup_hot_spares();
+  setup_cold_spares();
   terminate_idle_sessions();
   clean_obsolete_machines();
   exit;
 }
 
-(defined $ARGV[0] and $ARGV[0] =~ /^(\w*)/) or die "Invalid session name.\n";
+$ENV{WEBSOCAT_URI} =~ /^\/(\w*)/ or die;
 
 my $session = $1;
 $session = "lobby" unless length $session;
@@ -190,4 +273,4 @@ for(1..2) {
 die unless $pid;
 warn "* Container $machine ($pid) is available for $session; connecting.\n";
 
-exec(nsenter($pid), "${pkgs.shadow.su}/bin/su", "-c", "${ttystartup} $session", "guest");
+exec(netcat($pid));
