@@ -2,12 +2,23 @@
 
 let
   agdapad-package = pkgs.callPackage ./package.nix {};
-  myTigervnc = pkgs.callPackage ./tigervnc/default.nix {
+  mytigervnc = pkgs.callPackage ./tigervnc/default.nix {
     fontDirectories = with pkgs; [ xorg.fontadobe75dpi xorg.fontmiscmisc xorg.fontcursormisc ];
   };
+  myttyd = (pkgs.callPackage ./ttyd/default.nix {}).overrideAttrs (oldAttrs: rec {
+    postPatch = ''
+      sed -ie "/window.addEventListener('beforeunload', this.onWindowUnload);/ d" html/src/components/terminal/index.tsx
+      sed -ie "s/document.title = data + ' | ' + this.title;/document.title = data;/" html/src/components/terminal/index.tsx
+   '';
+  });
+  mydwm = pkgs.dwm.overrideAttrs (oldAttrs: rec {
+    postPatch = ''
+      sed -i -e 's/showbar\s*=\s*1/showbar = 0/' config.def.h
+    '';
+  });
   myemacs = pkgs.emacsWithPackages (epkgs: [ epkgs.evil epkgs.modus-vivendi-theme epkgs.modus-operandi-theme epkgs.tramp-theme epkgs.ahungry-theme ]);
   myemacs-nox = pkgs.emacs-nox.pkgs.withPackages (epkgs: [ epkgs.evil epkgs.modus-vivendi-theme epkgs.modus-operandi-theme epkgs.tramp-theme epkgs.ahungry-theme ]);
-  myAgda = pkgs.agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories ]);
+  myagda = pkgs.agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories ]);
 in {
   services.journald.extraConfig = ''
     Storage=volatile
@@ -49,7 +60,7 @@ in {
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       MemoryMax = "3G";
-      ExecStart = "${pkgs.ttyd}/bin/ttyd -a ${agdapad-package}/ttyprovisor.pl";
+      ExecStart = "${myttyd}/bin/ttyd -a ${agdapad-package}/ttyprovisor.pl";
     };
     path = with pkgs; [ bash perl systemd utillinux coreutils shadow.su tmux myemacs-nox ];
   };
@@ -89,7 +100,7 @@ in {
         hardware.pulseaudio.enable = true;
 
         environment.systemPackages = with pkgs; [
-          myTigervnc myemacs myAgda screenkey st dwm netcat
+          mytigervnc myemacs myagda screenkey st mydwm netcat
         ];
 
         fonts.fontconfig.enable = true;
@@ -113,7 +124,7 @@ in {
             ExecStart = "${agdapad-package}/vncinit.sh";
           };
           postStop = "${agdapad-package}/vncdown.sh";
-          path = with pkgs; [ bash myTigervnc netcat coreutils dwm myemacs ];
+          path = with pkgs; [ bash mytigervnc netcat coreutils mydwm myemacs ];
         };
 
         systemd.paths.poweroff = {
@@ -147,7 +158,7 @@ in {
         networking.firewall.enable = false;
 
         environment.systemPackages = with pkgs; [
-          bash tmux vim myemacs-nox myAgda
+          bash tmux vim myemacs-nox myagda
         ];
 
         programs.bash.enableCompletion = false;
