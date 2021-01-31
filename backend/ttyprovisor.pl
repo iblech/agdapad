@@ -110,7 +110,7 @@ sub terminate_idle_sessions {
     if($idle) {
       warn "* Session $machine is idle, terminating...\n";
       rename($machine, $machine . "off");
-      system("machinectl", "shell", "ttybox-$id", "poweroff");
+      system("machinectl", "poweroff", "ttybox-$id");
       mkdir "$ROOT/clean";
       mkdir "$ROOT/clean/$id";
     }

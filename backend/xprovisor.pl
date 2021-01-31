@@ -134,7 +134,7 @@ sub terminate_idle_sessions {
     if(not $idletime =~ /^\d+$/ or $idletime > $MAX_IDLE_TIME) {
       warn "* Session $machine is idle, terminating...\n";
       rename($machine, $machine . "off");
-      system("machinectl", "shell", "xbox-$id", "poweroff");
+      system("machinectl", "poweroff", "xbox-$id");
       mkdir "$ROOT/clean";
       mkdir "$ROOT/clean/$id";
     }
