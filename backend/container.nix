@@ -18,7 +18,7 @@ let
   });
   myemacs = pkgs.emacsWithPackages (epkgs: [ epkgs.evil epkgs.modus-vivendi-theme epkgs.modus-operandi-theme epkgs.tramp-theme epkgs.ahungry-theme ]);
   myemacs-nox = pkgs.emacs-nox.pkgs.withPackages (epkgs: [ epkgs.evil epkgs.modus-vivendi-theme epkgs.modus-operandi-theme epkgs.tramp-theme epkgs.ahungry-theme ]);
-  myagda = (import (builtins.fetchTarball "https://github.com/iblech/nixpkgs/archive/patch-agdastdlib15.tar.gz") {}).agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories ]);
+  myagda = pkgs.agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories ]);
 in {
   services.journald.extraConfig = ''
     Storage=volatile
