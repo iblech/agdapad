@@ -28,7 +28,23 @@ in {
   time.hardwareClockInLocalTime = true;
   networking.firewall.enable = false;
 
+  # This option defaults to true, but not if the system is itself a container.
+  # We need to ensure that this option is set in any case, so that our nested
+  # containers will work.
   boot.enableContainers = true;
+
+  # This declaration is redundant if this configuration file is imported as a
+  # container from the configuration file of a host system, of if it used for a
+  # command such as `nixos-generate -f lxc`. However, for convenience, we also want
+  # `nix-build "<nixpkgs/nixos>" -A system -I nixos-config=./container.nix` to work.
+  # Without this option, nix-build would rightfully complain about missing file
+  # system information.
+  boot.isContainer = true;
+
+  # When creating an lxc image using a command like `nixos-generate -c container.nix -f lxc`,
+  # the file nixos/virtualisation/lxc-container.nix is included, thereby
+  # enabling this option. We require it to be false, though.
+  environment.noXlibs = false;
 
   systemd.services.xprovisor = {
     description = "xprovisor";
