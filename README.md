@@ -41,7 +41,7 @@ of Linux will be forthcoming.
 
        $ xdg-open http://box:7681/?arg=CuriousSessionName
 
-    Test that graphical access works:
+   Test that graphical access works:
 
        $ websocat --binary tcp-l:127.0.0.1:5901 ws://box:6080/CuriousSessionName &
        $ vncviewer localhost:1
