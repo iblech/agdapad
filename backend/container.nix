@@ -104,7 +104,13 @@ in {
     enable = true;
     recommendedGzipSettings = true;
     recommendedOptimisation = true;
-    recommendedProxySettings = true;
+
+    # important to prevent annoying reconnects
+    appendHttpConfig = ''
+      proxy_send_timeout 600;
+      proxy_read_timeout 600;
+      proxy_http_version 1.1;
+    '';
 
     virtualHosts.localhost = {
       locations = {

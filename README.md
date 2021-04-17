@@ -64,7 +64,7 @@ of Linux will be forthcoming.
        users.users.guest = { isNormalUser = true; description = "Guest"; home = "/agdapad-homes"; uid = 10000; };
        containers.box = {
          config =
-           {config, pkgs, ...}:
+           { config, pkgs, ... }:
            { imports = [ /tmp-iblech/agdapad/backend/container.nix ]; };
          ephemeral = true;
          autoStart = true;
@@ -78,8 +78,14 @@ of Linux will be forthcoming.
 
 ## Reverse proxying for TLS support
 
-Add something like this to your `nginx.conf` to redirect traffic (including
-https trafic) to the host to the container.
+Add something like this to the `http` block in your `nginx.conf` to redirect
+traffic (including https trafic) to the host to the container.
+
+    # important to prevent annoying reconnects
+    proxy_send_timeout 600;
+    proxy_read_timeout 600;
+
+    proxy_http_version 1.1;
 
     server {
         listen 0.0.0.0:80;
@@ -118,9 +124,14 @@ to `/etc/nixos/configuration.nix`.
 
     services.nginx = {
       enable = true;
-      recommendedProxySettings = true;
       recommendedTlsSettings = true;
       recommendedOptimisation = true;
+      appendHttpConfig = ''
+         # important to prevent annoying reconnects
+         proxy_send_timeout 600;
+         proxy_read_timeout 600;
+         proxy_http_version 1.1;
+      '';
       virtualHosts."agdapad.quasicoherent.io" = {
         forceSSL = true;
         enableACME = true;
