@@ -16,8 +16,8 @@ let
       sed -i -e 's/showbar\s*=\s*1/showbar = 0/' config.def.h
     '';
   });
-  myemacs = pkgs.emacsWithPackages (epkgs: [ epkgs.evil epkgs.modus-vivendi-theme epkgs.modus-operandi-theme epkgs.tramp-theme epkgs.ahungry-theme ]);
-  myemacs-nox = pkgs.emacs-nox.pkgs.withPackages (epkgs: [ epkgs.evil epkgs.modus-vivendi-theme epkgs.modus-operandi-theme epkgs.tramp-theme epkgs.ahungry-theme ]);
+  myemacs = pkgs.emacsWithPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme ]);
+  myemacs-nox = pkgs.emacs-nox.pkgs.withPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme ]);
   myagda = pkgs.agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories ]);
 in {
   services.journald.extraConfig = ''
