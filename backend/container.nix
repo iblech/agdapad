@@ -2,6 +2,7 @@
 
 let
   agdapad-package = pkgs.callPackage ./package.nix {};
+  agdapad-static  = pkgs.callPackage ./static.nix {};
   mytigervnc = pkgs.callPackage ./tigervnc/default.nix {
     fontDirectories = with pkgs; [ xorg.fontadobe75dpi xorg.fontmiscmisc xorg.fontcursormisc ];
   };
@@ -76,7 +77,7 @@ in {
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       MemoryMax = "3G";
-      ExecStart = "${myttyd}/bin/ttyd -a ${agdapad-package}/ttyprovisor.pl";
+      ExecStart = "${myttyd}/bin/ttyd -b /__tty -a ${agdapad-package}/ttyprovisor.pl";
     };
     path = with pkgs; [ bash perl systemd utillinux coreutils shadow.su tmux myemacs-nox ];
   };
@@ -98,6 +99,27 @@ in {
 
   services.openssh.enable = true;
   services.openssh.permitRootLogin = "yes";
+
+  services.nginx = {
+    enable = true;
+    recommendedGzipSettings = true;
+    recommendedOptimisation = true;
+    recommendedProxySettings = true;
+
+    virtualHosts.localhost = {
+      locations = {
+	"/" = { root = agdapad-static; };
+	"/__tty" = {
+	  proxyPass = "http://localhost:7681";
+	  proxyWebsockets = true;
+	};
+	"/__vnc" = {
+	  proxyPass = "http://localhost:6080";
+	  proxyWebsockets = true;
+	};
+      };
+    };
+  };
 
   containers.xskeleton = {
     config =

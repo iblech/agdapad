@@ -237,7 +237,7 @@ if($ENV{WEBSOCAT_URI} =~ /\?maintainance/) {
   exit;
 }
 
-$ENV{WEBSOCAT_URI} =~ /^\/(\w*)/ or die;
+$ENV{WEBSOCAT_URI} =~ /^\/__vnc\/(\w*)/ or die;
 
 my $session = $1;
 $session = "lobby" unless length $session;

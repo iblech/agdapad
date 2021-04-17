@@ -24,7 +24,7 @@ strictly necessary though, instructions for self-hosting the backend on any flav
 of Linux will be forthcoming.
 
 
-## Instructions for a quick non-permanent setup
+### Instructions for a quick non-permanent setup
 
 1. Create and start the container:
 
@@ -39,15 +39,18 @@ of Linux will be forthcoming.
 
 3. That's it. Test that text-mode access works:
 
-       $ xdg-open http://box:7681/?arg=CuriousSessionName
+       $ xdg-open http://box:7681/__tty/?arg=CuriousSessionName
 
    Test that graphical access works:
 
-       $ websocat --binary tcp-l:127.0.0.1:5901 ws://box:6080/CuriousSessionName &
+       $ websocat -E --binary tcp-l:127.0.0.1:5901 ws://box:6080/__vnc/CuriousSessionName &
        $ vncviewer localhost:1
 
+   There will also be a webserver running at `http://box/`. However, do not
+   expect this to work -- browsers establish websocket connections only over TLS.
 
-## Instructions for a permanent setup
+
+### Instructions for a permanent setup
 
 1. Create a directory in which the homes of all Agdapad sessions will be
    stored, for instance `/agdapad-homes`.
@@ -73,31 +76,60 @@ of Linux will be forthcoming.
 4. Switch to the new configuration.
 
 
-## Self-hosting the frontend
+## Reverse proxying for TLS support
 
-The frontend just consists of a couple of static files which can be hosted with
-any webserver. The server name `agdapad.quasicoherent.io` is hardcoded a
-couple of times; you will have to change these to reference your own server.
+Add something like this to your `nginx.conf` to redirect traffic (including
+https trafic) to the host to the container.
 
-You will also need to set up a couple of rewrite rules so that your webserver
-correctly reverse-proxies requests to the backend server ports. For Apache2,
-the required configuration looks as follows.
+    server {
+        listen 0.0.0.0:80;
+        listen [::]:80;
+        server_name agdapad.quasicoherent.io;
+        location /.well-known/acme-challenge {
+            root /var/lib/acme/acme-challenge;
+            auth_basic off;
+        }
+        location / {
+            return 301 https://$host$request_uri;
+        }
+    }
 
-    RewriteEngine on
-    SSLProxyEngine on
+    server {
+        listen 0.0.0.0:443 ssl http2;
+        listen [::]:443 ssl http2;
+        server_name agdapad.quasicoherent.io;
+        location /.well-known/acme-challenge {
+            root /var/lib/acme/acme-challenge;
+            auth_basic off;
+        }
+        ssl_certificate /var/lib/acme/agdapad.quasicoherent.io/fullchain.pem;
+        ssl_certificate_key /var/lib/acme/agdapad.quasicoherent.io/key.pem;
+        ssl_trusted_certificate /var/lib/acme/agdapad.quasicoherent.io/chain.pem;
+        location / {
+            proxy_pass http://192.168.0.2;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+        }
+    }
 
-    RewriteCond %{REQUEST_URI} !/__tty
-    RewriteCond %{HTTP:Upgrade} websocket [NC]
-    RewriteCond %{HTTP:Connection} upgrade [NC]
-    RewriteRule .* "ws://localhost:6080%{REQUEST_URI}" [P,L,QSA]
+If you are running NixOS, these settings can be achieved by the following entry
+to `/etc/nixos/configuration.nix`.
 
-    RewriteCond %{REQUEST_URI} /__tty
-    RewriteCond %{HTTP:Upgrade} websocket [NC]
-    RewriteCond %{HTTP:Connection} upgrade [NC]
-    RewriteRule .* "ws://localhost:7681/ws" [P,L,QSA]
-    ProxyPass /__tty http://localhost:7681/
-    ProxyPassReverse /__tty http://localhost:7681/
-    ProxyRequests off
+    services.nginx = {
+      enable = true;
+      recommendedProxySettings = true;
+      recommendedTlsSettings = true;
+      recommendedOptimisation = true;
+      virtualHosts."agdapad.quasicoherent.io" = {
+        forceSSL = true;
+        enableACME = true;
+        locations."/" = {
+          proxyPass = "http://192.168.0.2";
+          proxyWebsockets = true;
+        };
+      };
+    };
 
 
 # Pitfalls
@@ -112,7 +144,7 @@ the required configuration looks as follows.
   `/home/.skeleton` are set correctly.
 
 * Because of the nested containers, you may run into limitations regarding open
-  filehandles. Left these limitations by something like `boot.kernel.sysctl = { "fs.file-max" = 65536; }`.
+  filehandles. Lift these limitations by something like `boot.kernel.sysctl = { "fs.file-max" = 65536; }`.
 
 
 # Notes
