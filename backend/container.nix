@@ -114,7 +114,10 @@ in {
 
     virtualHosts.localhost = {
       locations = {
-	"/" = { root = agdapad-static; };
+        "/" = {
+           root = agdapad-static;
+           extraConfig = "expires 1d;";
+         };
 	"/__tty" = {
 	  proxyPass = "http://localhost:7681";
 	  proxyWebsockets = true;
