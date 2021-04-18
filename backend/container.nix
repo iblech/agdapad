@@ -116,7 +116,7 @@ in {
       locations = {
         "/" = {
            root = agdapad-static;
-           extraConfig = "expires 1d;";
+           extraConfig = "expires 3d;";
          };
 	"/__tty" = {
 	  proxyPass = "http://localhost:7681";
