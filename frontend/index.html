@@ -281,7 +281,8 @@
         button[type="submit"] { height: 2em; font-size: large; width: 70px; padding: 0; }
     </style>
 
-    <link rel="stylesheet" href="spinner.css">
+    <!-- trick to load this stylesheet asynchronously -->
+    <link rel="stylesheet" href="spinner.css" media="print" onload="this.media='all'; this.onload=null;">
 </head>
 
 <body>
