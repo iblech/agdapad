@@ -105,11 +105,21 @@ in {
     recommendedGzipSettings = true;
     recommendedOptimisation = true;
 
+    package = pkgs.nginxMainline.override {
+      modules = [ pkgs.nginxModules.brotli ];
+    };
+
     # important to prevent annoying reconnects
     appendHttpConfig = ''
       proxy_send_timeout 600;
       proxy_read_timeout 600;
       proxy_http_version 1.1;
+    '';
+
+    commonHttpConfig = ''
+      brotli on;
+      brotli_static on;
+      brotli_types application/json application/javascript application/xml application/xml+rss image/svg+xml text/css text/html text/javascript text/plain text/xml;
     '';
 
     virtualHosts.localhost = {
