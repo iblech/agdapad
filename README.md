@@ -155,13 +155,16 @@ to `/etc/nixos/configuration.nix`.
   `/home/.skeleton` are set correctly.
 
 * Because of the nested containers, you may run into limitations regarding open
-  filehandles. Lift these limitations by something like `boot.kernel.sysctl = { "fs.file-max" = 65536; }`.
+  filehandles. Lift these limitations by something like:
+
+      boot.kernel.sysctl = {
+        "fs.inotify.max_user_watches" = 163840;
+        "fs.inotify.max_user_instances" = 2048;
+        "fs.file-max" = 655360;
+      };
 
 
 # Notes
-
-* We currently use our own build of TigerVNC because the version provided in
-  nixpkgs is broken as of writing (pull request is in the making).
 
 * We use our own build of ttyd because the version provided in nixpkgs doesn't
   compile the html bundle from source, instead using a prepackaged binary blob

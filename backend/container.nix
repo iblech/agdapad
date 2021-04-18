@@ -3,7 +3,7 @@
 let
   agdapad-package = pkgs.callPackage ./package.nix {};
   agdapad-static  = pkgs.callPackage ./static.nix {};
-  mytigervnc = pkgs.callPackage ./tigervnc/default.nix {
+  mytigervnc = pkgs.tigervnc.override {
     fontDirectories = with pkgs; [ xorg.fontadobe75dpi xorg.fontmiscmisc xorg.fontcursormisc ];
   };
   myttyd = (pkgs.callPackage ./ttyd/default.nix {}).overrideAttrs (oldAttrs: rec {
@@ -168,7 +168,7 @@ in {
             ExecStart = "${agdapad-package}/vncinit.sh";
           };
           postStop = "${agdapad-package}/vncdown.sh";
-          path = with pkgs; [ bash mytigervnc netcat coreutils mydwm myemacs ];
+          path = with pkgs; [ bash util-linux xorg.xauth mytigervnc netcat coreutils mydwm myemacs ];
         };
 
         systemd.paths.poweroff = {
