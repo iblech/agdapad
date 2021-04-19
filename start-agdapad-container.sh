@@ -6,6 +6,13 @@ hostip="$1"
 containerip="$2"
 home="$3"
 
+if [ -z "$hostip" ] || [ -z "$containerip" ] || [ -z "$home" ]; then
+  echo "usage: $0 hostip containerip /home/dir/for/the/container" >&2
+  exit 1
+fi
+
+cd backend
+
 [ -e container.nix ] || {
   echo "not found: ./container.nix" >&2
   exit 1
@@ -42,4 +49,8 @@ EOF
 
 chmod +x sbin/init
 
-systemd-nspawn -n --bind-ro=/nix/store --bind-ro=/nix/var/nix/db --bind="$home":/home --boot -M agdapad -xD "$dir"
+systemd-nspawn -n --bind-ro=/nix/store --bind-ro=/nix/var/nix/db --bind="$home":/home --boot -M agdapad -xD "$dir" &
+
+# uff, not very nice
+sleep 1
+ifconfig ve-agdapad $hostip up
