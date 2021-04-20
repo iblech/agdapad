@@ -14,7 +14,7 @@
 * Löb-like nested containers
 * WebDAV access to user files for easy up- and downloading
 * Building on awesome open source technology: GNU/Linux, Perl, NixOS, TigerVNC,
-  NoVNC, systemd
+  nginx, NoVNC, systemd
 * AGPLv3+ licensed
 
 
