@@ -138,23 +138,23 @@ in {
            root = agdapad-static;
            extraConfig = "expires 3d;";
          };
-	"/__tty" = {
-	  proxyPass = "http://localhost:7681";
-	  proxyWebsockets = true;
-	};
-	"/__vnc" = {
-	  proxyPass = "http://localhost:6080";
-	  proxyWebsockets = true;
-	};
+        "/__tty" = {
+          proxyPass = "http://localhost:7681";
+          proxyWebsockets = true;
+        };
+        "/__vnc" = {
+          proxyPass = "http://localhost:6080";
+          proxyWebsockets = true;
+        };
         "~ ^/~(\\w+)(\\/.*)?$" = {  # exclude both ".."-style enumeration attacks and access to ".skeleton", ".hot-spare-*" etc.
           alias = "/home/$1$2";
-	  extraConfig = ''
+          extraConfig = ''
             expires epoch;
-	    autoindex on;
-	    dav_methods     PUT DELETE MKCOL COPY MOVE;
-	    dav_ext_methods PROPFIND OPTIONS;
-	    dav_access      user:rw group:rw all:r;
-	  '';
+            autoindex on;
+            dav_methods     PUT DELETE MKCOL COPY MOVE;
+            dav_ext_methods PROPFIND OPTIONS;
+            dav_access      user:rw group:rw all:r;
+          '';
         };
       };
     };
