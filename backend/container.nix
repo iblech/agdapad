@@ -9,6 +9,7 @@ let
   myttyd = (pkgs.callPackage ./ttyd/default.nix {}).overrideAttrs (oldAttrs: rec {
     postPatch = ''
       sed -ie "/window.addEventListener('beforeunload', this.onWindowUnload);/ d" html/src/components/terminal/index.tsx
+      sed -ie "s/Connection Closed/Connection closed/" html/src/components/terminal/index.tsx
       sed -ie "s/document.title = data + ' | ' + this.title;/document.title = data;/" html/src/components/terminal/index.tsx
    '';
   });
