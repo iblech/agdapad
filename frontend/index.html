@@ -415,6 +415,9 @@
     <textarea id="clipboard" disabled></textarea>
     <img src="images/clipboard.svg" id="clipboard-icon">
     <div>
+        <input type="button" value="Download files (or upload via WebDAV)" onclick="
+            window.location.href = '/~' + sessionNameFromHash() + '/';
+        "></input>
         <input type="reset" value="Clear"></input>
         <input type="button" id="clipboard-dismiss" onclick="document.getElementById('clipboard').disabled = true; return false;" value="Dismiss">
     </div>
