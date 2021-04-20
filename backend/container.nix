@@ -149,6 +149,7 @@ in {
         "~ ^/~(\\w+)(\\/.*)?$" = {  # exclude both ".."-style enumeration attacks and access to ".skeleton", ".hot-spare-*" etc.
           alias = "/home/$1$2";
 	  extraConfig = ''
+            expires epoch;
 	    autoindex on;
 	    dav_methods     PUT DELETE MKCOL COPY MOVE;
 	    dav_ext_methods PROPFIND OPTIONS;
