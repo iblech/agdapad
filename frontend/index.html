@@ -53,7 +53,7 @@
                     document.getElementById("clipboard").disabled = true;
                 }
             };
-            document.getElementById("clipboard").placeholder = "Connection to https://" + window.location.hostname + "/#" + sessionName + " established. The contents of this box are synchronized with the clipboard on the server. Text copied in Emacs shows up here, and text entered here can be pasted in Emacs.";
+            document.getElementById("clipboard").placeholder = "Connection to https://" + window.location.hostname + "/#" + sessionName + " established. The content of this box is synchronized with the clipboard on the server. Text copied in Emacs shows up here, and text entered here can be pasted in Emacs.";
 
             let ownrfb = new RFB(screen, "wss://" + window.location.hostname + "/__vnc/" + sessionName);
             rfb = ownrfb;
