@@ -120,6 +120,11 @@ in {
       brotli on;
       brotli_static on;
       brotli_types application/json application/javascript application/xml application/xml+rss image/svg+xml text/css text/html text/javascript text/plain text/xml;
+      types {
+        text/x-agda     agda lagda;
+      }
+      charset utf-8;
+      charset_types text/x-agda;
     '';
 
     virtualHosts.localhost = {
@@ -136,9 +141,16 @@ in {
 	  proxyPass = "http://localhost:6080";
 	  proxyWebsockets = true;
 	};
+        "~ ^/~(\\w+)(\\/.*)?$" = {  # exclude both ".."-style enumeration attacks and access to ".skeleton", ".hot-spare-*" etc.
+          alias = "/home/$1$2";
+          extraConfig = "autoindex on;";
+        };
       };
     };
   };
+
+  # required so nginx can serve /~foo/bar.agda
+  systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
 
   containers.xskeleton = {
     config =

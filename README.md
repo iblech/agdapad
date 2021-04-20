@@ -181,3 +181,4 @@ to `/etc/nixos/configuration.nix`.
 * system image for offline work
 * ssh access
 * document viewonly mode
+* document `/~foo/bar.agda` http access

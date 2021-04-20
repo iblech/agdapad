@@ -188,4 +188,7 @@ for(1..2) {
 die unless $pid;
 warn "* Container $machine ($pid) is available for $session; connecting.\n";
 
+# Ensure that home directory is readable for nginx
+chmod 0755, "/home/$session";
+
 exec(nsenter($pid), "su", "-c", "@out@/ttystartup.sh $session", "guest");
