@@ -100,13 +100,18 @@ in {
   services.openssh.enable = true;
   services.openssh.permitRootLogin = "yes";
 
+  users.users.guest = { isNormalUser = true; description = "Guest"; home = "/home/guest"; uid = 10000; };
+
   services.nginx = {
     enable = true;
     recommendedGzipSettings = true;
     recommendedOptimisation = true;
 
+    user = "guest";
+    # so nginx can serve /~foo/bar.agda (also read-write using DAV)
+
     package = pkgs.nginxMainline.override {
-      modules = [ pkgs.nginxModules.brotli ];
+      modules = [ pkgs.nginxModules.brotli pkgs.nginxModules.dav ];
     };
 
     # important to prevent annoying reconnects
@@ -143,7 +148,12 @@ in {
 	};
         "~ ^/~(\\w+)(\\/.*)?$" = {  # exclude both ".."-style enumeration attacks and access to ".skeleton", ".hot-spare-*" etc.
           alias = "/home/$1$2";
-          extraConfig = "autoindex on;";
+	  extraConfig = ''
+	    autoindex on;
+	    dav_methods     PUT DELETE MKCOL COPY MOVE;
+	    dav_ext_methods PROPFIND OPTIONS;
+	    dav_access      user:rw group:rw all:r;
+	  '';
         };
       };
     };

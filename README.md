@@ -12,6 +12,7 @@
 * Robust container acquisition – people accessing the same Agdapad URL
   will be connected to the same session even in case of bad timing
 * Löb-like nested containers
+* WebDAV access to user files for easy up- and downloading
 * Building on awesome open source technology: GNU/Linux, Perl, NixOS, TigerVNC,
   NoVNC, systemd
 * AGPLv3+ licensed
@@ -181,4 +182,4 @@ to `/etc/nixos/configuration.nix`.
 * system image for offline work
 * ssh access
 * document viewonly mode
-* document `/~foo/bar.agda` http access
+* document `/~foo/bar.agda` http read-only access and read-write access using WebDAV
