@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=emacs-agda
+Comment=
+Exec=emacs hello.agda
+StartupNotify=false
+Terminal=false
+Hidden=false

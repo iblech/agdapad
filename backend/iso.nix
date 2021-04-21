@@ -40,6 +40,14 @@
     initialHashedPassword = "$6$utLZPDNys$nxpqRBobo7NAi9kFs7J8Ar5UN2zJY97.tuavJyk1ACyVoELeUwS3AtU7eCPq.R3Yxtb3GvmpuOuH0xrww0pdp.";
   };
 
+  boot.postBootCommands = ''
+    cd /home/ada
+    cp --no-preserve=mode -nrT ${agdapad-package}/skeleton-home .
+    mkdir -p /home/ada/.config/autostart
+    ln -s ${agdapad-package}/emacs-agda.desktop /home/ada/.config/autostart/
+    chown -R ada.users .
+  '';
+
   services.xserver = {
     enable = true;
     desktopManager.xfce.enable = true;
