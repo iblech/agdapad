@@ -15,9 +15,18 @@ fi
 
 cp --no-preserve=mode -nrT @out@/skeleton-home .
 
+while :; do
+  numberOfClients=$(ps xua | grep "nc localhos[t]" | wc -l)
+  if [ "$numberOfClients" -ge 2 ]; then
+    echo "$numberOfClients"
+  fi
+  sleep 1
+done | osd_cat -l 1 -d 1 -c purple -A right -p top &
+
 [ -x .xstartup ] && . .xstartup
 
 dwm &
+
 exec emacs --fullscreen hello.agda
 
 # alternative: launch a full desktop environment
