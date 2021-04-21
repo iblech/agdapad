@@ -20,7 +20,6 @@ in {
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   i18n.supportedLocales = [ "en_US.UTF-8/UTF-8" ];
-  hardware.enableRedistributableFirmware = lib.mkForce false;
 
   networking = {
     hostName = "lovelace";
