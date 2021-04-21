@@ -3,15 +3,24 @@
 
 { config, lib, pkgs, ... }:
 
-{
+let
+  agdapad-package = pkgs.callPackage ./package.nix {};
+  slimAgda = pkgs.callPackage ./slim-agda.nix {};
+in {
   imports = [
     <nixpkgs/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix>
     <nixpkgs/nixos/modules/installer/cd-dvd/channel.nix>
   ];
 
-  services.journald.extraConfig = "Storage=volatile";
+  services.journald.extraConfig = ''
+    Storage=volatile
+    RuntimeMaxUse=1M
+  '';
   boot.kernel.sysctl = { "vm.dirty_writeback_centisecs" = 6000; };
   boot.kernelPackages = pkgs.linuxPackages_latest;
+
+  i18n.supportedLocales = [ "en_US.UTF-8/UTF-8" ];
+  hardware.enableRedistributableFirmware = lib.mkForce false;
 
   networking = {
     hostName = "lovelace";
@@ -24,9 +33,9 @@
   fonts.fontconfig.enable = lib.mkForce true;
 
   environment.systemPackages = with pkgs; [
-    bash vim evince firefoxWrapper sshfs git screen socat
+    bash vim firefoxWrapper sshfs git screen socat
     (emacsWithPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme ]))
-    (agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories ]))
+    (slimAgda)
   ];
 
   fonts.fonts = with pkgs; [ ubuntu_font_family ];
@@ -63,4 +72,6 @@
       touchpad.middleEmulation = true;
     };
   };
+
+  hardware.opengl.enable = false;
 }
