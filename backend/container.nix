@@ -20,7 +20,7 @@ let
   });
   myemacs = pkgs.emacsWithPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme ]);
   myemacs-nox = pkgs.emacs-nox.pkgs.withPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme ]);
-  myagda = (import (builtins.fetchTarball "https://github.com/turion/nixpkgs/tarball/a6a061307970bf8de940fe239b8fabbd0390f7ea") {}).agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories ]);
+  myagda = pkgs.agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories ]);
 in {
   services.journald.extraConfig = ''
     Storage=volatile
