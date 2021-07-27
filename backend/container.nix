@@ -3,9 +3,6 @@
 let
   agdapad-package = pkgs.callPackage ./package.nix {};
   agdapad-static  = pkgs.callPackage ./static.nix {};
-  mytigervnc = pkgs.tigervnc.override {
-    fontDirectories = with pkgs; [ xorg.fontadobe75dpi xorg.fontmiscmisc xorg.fontcursormisc ];
-  };
   myttyd = (pkgs.callPackage ./ttyd/default.nix {}).overrideAttrs (oldAttrs: rec {
     postPatch = ''
       sed -ie "/window.addEventListener('beforeunload', this.onWindowUnload);/ d" html/src/components/terminal/index.tsx
@@ -20,7 +17,7 @@ let
   });
   myemacs = pkgs.emacsWithPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme ]);
   myemacs-nox = pkgs.emacs-nox.pkgs.withPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme ]);
-  myagda = pkgs.agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories ]);
+  myagda = (import (builtins.fetchTarball "https://github.com/NixOS/nixpkgs/archive/b0284395a60b98c9970c877b6262b5e383635ada.tar.gz") {}).agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories ]);
 in {
   services.journald.extraConfig = ''
     Storage=volatile
@@ -181,7 +178,7 @@ in {
         hardware.pulseaudio.enable = true;
 
         environment.systemPackages = with pkgs; [
-          mytigervnc myemacs myagda screenkey st mydwm netcat xosd
+          tigervnc myemacs myagda screenkey st mydwm netcat xosd
         ];
 
         fonts.fontconfig.enable = true;
@@ -205,7 +202,7 @@ in {
             ExecStart = "${agdapad-package}/vncinit.sh";
           };
           postStop = "${agdapad-package}/vncdown.sh";
-          path = with pkgs; [ bash util-linux xorg.xauth mytigervnc netcat coreutils mydwm myemacs ];
+          path = with pkgs; [ bash util-linux xorg.xauth tigervnc netcat coreutils mydwm myemacs ];
         };
 
         systemd.paths.poweroff = {
