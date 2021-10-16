@@ -80,7 +80,7 @@ of Linux will be forthcoming.
 ## Reverse proxying for TLS support
 
 Add something like this to the `http` block in your `nginx.conf` to redirect
-traffic (including https trafic) to the host to the container.
+traffic (including https traffic) to the host to the container.
 
     # important to prevent annoying reconnects
     proxy_send_timeout 600;
