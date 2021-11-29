@@ -159,7 +159,7 @@ in {
   };
 
   # required so nginx can serve /~foo/bar.agda
-  systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
+  systemd.services.nginx.serviceConfig.ProtectHome = "no";
 
   containers.xskeleton = {
     config =
