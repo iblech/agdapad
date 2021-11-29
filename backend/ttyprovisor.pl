@@ -40,7 +40,7 @@ sub create_session {
       cp -Ta --reflink=auto /home/.skeleton /home/$session
       chown 10000 /home/$session
     fi
-    < ttyskeleton.conf sed -e 's+/home/\.skeleton+/home/$session+g' > ttybox-$id.conf
+    < ttyskeleton.conf sed -e 's+/home/\.skeleton+/home/$session+g' -e 's+__SESSION_NAME__+$session+g' > ttybox-$id.conf
     systemctl start container\@ttybox-$id.service
   ") == 0 or die;
 

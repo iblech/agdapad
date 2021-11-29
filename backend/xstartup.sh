@@ -25,12 +25,13 @@ done | osd_cat -l 1 -d 1 -c purple -A right -p top &
 
 [ -x .xstartup ] && . .xstartup
 
-dwm &
-
-exec emacs --fullscreen hello.agda
-
-# alternative: launch a full desktop environment
-eval $(dbus-launch --exit-with-session --sh-syntax)
-systemctl --user import-environment DISPLAY XAUTHORITY
-dbus-update-activation-environment DISPLAY XAUTHORITY
-exec xfce4-session
+if [ "${AGDAPAD_SESSION_NAME:0:5}" = "full-" ]; then
+  # launch a full desktop environment
+  eval $(dbus-launch --exit-with-session --sh-syntax)
+  systemctl --user import-environment DISPLAY XAUTHORITY
+  dbus-update-activation-environment DISPLAY XAUTHORITY
+  exec xfce4-session
+else
+  dwm &
+  exec emacs --fullscreen hello.agda
+fi

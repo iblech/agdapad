@@ -16,4 +16,6 @@ until nc -z localhost 5901; do
   sleep 0.1
 done
 
+export AGDAPAD_SESSION_NAME="$(grep -z ^AGDAPAD_SESSION_NAME= /proc/1/environ | cut -d= -f2-)"
+
 DISPLAY=:1 exec @out@/xstartup.sh

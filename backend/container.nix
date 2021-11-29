@@ -219,6 +219,7 @@ in {
     ephemeral = true;
     privateNetwork = true;
     bindMounts = { "/home/guest" = { hostPath = "/home/.skeleton"; isReadOnly = false; }; };
+    extraFlags = [ "--setenv=AGDAPAD_SESSION_NAME=__SESSION_NAME__" ];
   };
 
   containers.ttyskeleton = {
@@ -246,5 +247,6 @@ in {
     ephemeral = true;
     privateNetwork = true;
     bindMounts = { "/home/guest" = { hostPath = "/home/.skeleton"; isReadOnly = false; }; };
+    extraFlags = [ "--setenv=AGDAPAD_SESSION_NAME=__SESSION_NAME__" ];
   };
 }
