@@ -15,6 +15,10 @@
 (add-hook 'agda2-mode-hook
 	#'(lambda () (define-key (current-local-map) (kbd "C-u") (lookup-key (current-local-map) (kbd "C-c")))))
 
+(defun start-thehottgame () (interactive) (find-file "~/TheHoTTGame"))
+(define-key menu-bar-help-menu [sep9] '("--"))
+(define-key menu-bar-help-menu [f] '(menu-item "Learn Agda with The HoTT Game" start-thehottgame))
+
 (require 'evil)
 (setq evil-default-state 'emacs)
 (setq evil-want-fine-undo 't)
