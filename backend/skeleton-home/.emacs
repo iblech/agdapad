@@ -19,6 +19,8 @@
 (define-key menu-bar-help-menu [sep9] '("--"))
 (define-key menu-bar-help-menu [f] '(menu-item "Learn Agda with The HoTT Game" start-thehottgame))
 
+(run-with-idle-timer 60 t '(lambda () (save-some-buffers t nil)))
+
 (require 'evil)
 (setq evil-default-state 'emacs)
 (setq evil-want-fine-undo 't)
