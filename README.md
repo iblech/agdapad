@@ -13,6 +13,7 @@
   will be connected to the same session even in case of bad timing
 * Löb-like nested containers
 * WebDAV access to user files for easy up- and downloading
+* Rudimentary load control (background autoconnect is disabled if server load is high)
 * Building on awesome open source technology: GNU/Linux, Perl, NixOS, TigerVNC,
   nginx, NoVNC, systemd
 * AGPLv3+ licensed

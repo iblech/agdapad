@@ -93,9 +93,12 @@
             }
         }
 
-        installRFB();
+        if("__DO_PRECONNECT__") {
+            installRFB();
+        }
 
         function exitSession () {
+            if(!rfb) return;
             rfb.blur();
             rfb.disconnect();
             document.getElementById("spinner").style.display = "block";
@@ -104,7 +107,7 @@
         function loadSession (name) {
             document.getElementById("info-area").className = "hidden";
 
-            if(name != sessionName) {
+            if(name != sessionName || !screen) {
                 exitSession();
                 sessionName = name;
                 installRFB();

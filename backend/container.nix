@@ -100,6 +100,7 @@ in {
 
   users.users.guest = { isNormalUser = true; description = "Guest"; home = "/home/guest"; uid = 10000; };
 
+  systemd.services.nginx.serviceConfig.BindReadOnlyPaths = "/proc/loadavg:/loadavg";
   services.nginx = {
     enable = true;
     recommendedGzipSettings = true;
@@ -109,7 +110,7 @@ in {
     # so nginx can serve /~foo/bar.agda (also read-write using DAV)
 
     package = pkgs.nginxMainline.override {
-      modules = [ pkgs.nginxModules.brotli pkgs.nginxModules.dav ];
+      modules = with pkgs.nginxModules; [ brotli dav lua develkit ];
     };
 
     # important to prevent annoying reconnects
@@ -133,9 +134,29 @@ in {
     virtualHosts.localhost = {
       locations = {
         "/" = {
-           root = agdapad-static;
-           extraConfig = "expires 3d;";
-         };
+          root = agdapad-static;
+          extraConfig = ''
+            expires 7d;
+          '';
+        };
+        "/index.html" = {
+          root = agdapad-static;
+          extraConfig = ''
+            expires 3h;
+            set_by_lua_block $do_preconnect {
+              local f = io.open("/loadavg")
+              local line = f:read("*line")
+              f:close()
+              local l1 = string.match(line, "([%d]*%.[%d]*)%s")
+              if tonumber(l1) >= 2 then
+                return "0"
+              else
+                return "1"
+              end
+            }
+            sub_filter '"__DO_PRECONNECT__"' $do_preconnect;
+          '';
+        };
         "/__tty" = {
           proxyPass = "http://localhost:7681";
           proxyWebsockets = true;
