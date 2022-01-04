@@ -13,8 +13,8 @@ stdenv.mkDerivation rec {
   src = fetchFromGitHub {
     owner = "tsl0922";
     repo = pname;
-    rev = version;
-    sha256 = "0yks0dz0prajvq6aksznih6ggxf337c1amhkj5flkn7cv3vrvd8j";
+    rev = "3e37e33b1cd927ae8f25cfbcf0da268723b6d230";
+    sha256 = "03kb03pnhc2zf7jxs4d1vkb54sr9v2x6fjj8nvs17dvs2smrg5ji";
   };
 
   nativeBuildInputs = [ pkg-config cmake xxd yarn nodejs-slim python3 ];
