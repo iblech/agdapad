@@ -8,7 +8,7 @@ my $ROOT               = "/root/x";
 my $NUM_HOT_SPARES     = 3;
 my $NUM_COLD_SPARES    = 1;
 my $NUM_TOTAL_SESSIONS = 100_000;
-my $MAX_IDLE_TIME      = 600 * 1000;  # for the time being
+my $MAX_IDLE_TIME      = 300 * 1000;  # for the time being
 
 mkdir $ROOT;
 die unless -d $ROOT;
@@ -173,7 +173,7 @@ sub clean_obsolete_machines {
 # Acquire a container for a given session name.
 # Repurposes one of the available hot spares if possible; else spawns a new
 # container.
-# Assumes that $ROOT/sessions/$session already exists, that is that we feel
+# Assumes that the directory $ROOT/sessions/$session already exists, that is that we feel
 # responsible for setting up a container for $session.
 sub acquire_session {
   my $session = shift;
@@ -230,10 +230,10 @@ unless(-d "/home/.skeleton") {
 }
 
 if($ENV{WEBSOCAT_URI} =~ /\?maintainance/) {
-  setup_hot_spares();
-  setup_cold_spares();
   terminate_idle_sessions();
   clean_obsolete_machines();
+  setup_hot_spares();
+  setup_cold_spares();
   exit;
 }
 
@@ -243,7 +243,9 @@ my $session = $1;
 $session = "lobby" unless length $session;
 die unless length $session < 200;
 
-warn "* Got request for session $session.\n";
+my $loadavg = 0 + `cat /proc/loadavg | cut -d' ' -f1`;
+warn "* Got request for session $session, current load average $loadavg.\n";
+die "Too much load" if $loadavg > 30;
 
 mkdir "$ROOT/sessions";
 
