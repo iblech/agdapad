@@ -9,7 +9,7 @@ my $NUM_HOT_SPARES     = 3;
 my $NUM_COLD_SPARES    = 1;
 my $NUM_TOTAL_SESSIONS = 100_000;
 my $MAX_IDLE_TIME      = 300;  # in seconds
-my $MAX_CONCURRENT_SESSIONS = 200;
+my $MAX_CONCURRENT_MACHINES = 200;
 
 mkdir $ROOT;
 die unless -d $ROOT;
@@ -35,7 +35,7 @@ sub allocate_machine {
 sub create_session {
   my ($session, $id) = @_;
 
-  if(`machinectl list | wc -l` > $MAX_CONCURRENT_SESSIONS) {
+  if(`machinectl list | wc -l` > $MAX_CONCURRENT_MACHINES) {
       die "* Maximum number of concurrent sessions reached; not spawning new container for $session.\n";
   }
 
