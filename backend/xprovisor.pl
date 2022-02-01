@@ -8,7 +8,7 @@ my $ROOT               = "/root/x";
 my $NUM_HOT_SPARES     = 3;
 my $NUM_COLD_SPARES    = 1;
 my $NUM_TOTAL_SESSIONS = 100_000;
-my $MAX_IDLE_TIME      = 300 * 1000;  # for the time being
+my $MAX_IDLE_TIME      = 300;  # in seconds
 my $MAX_CONCURRENT_SESSIONS = 200;
 
 mkdir $ROOT;
@@ -81,7 +81,7 @@ sub netcat {
   my $pid = shift;
   die unless $pid;
 
-  return qw< nsenter -a -t >, $pid, qw< nc localhost 5901 >;
+  return qw< nsenter -a -t >, $pid, qw< nc -w >, $MAX_IDLE_TIME, qw< localhost 5901 >;
 }
 
 # Check whether a VNC connection can be established to the given machine.
@@ -136,7 +136,7 @@ sub terminate_idle_sessions {
     }
 
     my $idletime = `nsenter -a -t $pid /usr/bin/env DISPLAY=:1 XAUTHORITY=/home/guest/.Xauthority xprintidle-ng`;
-    if(not $idletime =~ /^\d+$/ or $idletime > $MAX_IDLE_TIME) {
+    if(not $idletime =~ /^\d+$/ or $idletime > $MAX_IDLE_TIME*1000) {
       warn "* Session $machine is idle, terminating...\n";
       rename($machine, $machine . "off");
       system("machinectl", "poweroff", "xbox-$id");
