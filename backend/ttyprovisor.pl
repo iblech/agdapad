@@ -6,6 +6,7 @@ use Time::HiRes;
 
 my $ROOT               = "/root/tty";
 my $NUM_TOTAL_SESSIONS = 100_000;
+my $MAX_CONCURRENT_SESSIONS = 200;
 
 mkdir $ROOT;
 die unless -d $ROOT;
@@ -30,6 +31,10 @@ sub allocate_machine {
 # its availability by creating an entry under $ROOT/sessions/$session.
 sub create_session {
   my ($session, $id) = @_;
+
+  if(`machinectl list | wc -l` > $MAX_CONCURRENT_SESSIONS) {
+      die "* Maximum number of concurrent sessions reached; not spawning new container for $session.\n";
+  }
 
   $id = allocate_machine() unless $id;
   warn "* Spawning container $id for session $session...\n";
