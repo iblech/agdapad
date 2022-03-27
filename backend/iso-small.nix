@@ -18,6 +18,10 @@ in {
   '';
   boot.kernel.sysctl = { "vm.dirty_writeback_centisecs" = 6000; };
   boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.loader.timeout = lib.mkForce 2;
+  boot.supportedFilesystems = lib.mkForce [ "btrfs" "ext4" "vfat" "ntfs" "cifs" ];
+
+  isoImage.appendToMenuLabel = " Live System";
 
   i18n.supportedLocales = [ "en_US.UTF-8/UTF-8" ];
 
@@ -57,6 +61,8 @@ in {
   '';
 
   services.xserver = {
+    #layout = "de";
+    #xkbVariant = "nodeadkeys";
     enable = true;
     desktopManager.xfce.enable = true;
     displayManager = {
