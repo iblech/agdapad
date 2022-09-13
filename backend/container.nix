@@ -123,12 +123,15 @@ in {
     commonHttpConfig = ''
       brotli on;
       brotli_static on;
-      brotli_types application/json application/javascript application/xml application/xml+rss image/svg+xml text/css text/html text/javascript text/plain text/xml;
+      brotli_types application/json application/javascript application/xml application/xml+rss image/svg+xml text/css text/html text/javascript text/plain text/xml text/x-agda text/x-scheme;
       types {
-        text/x-agda     agda lagda;
+        text/x-agda   agda lagda;
+        text/x-scheme scm rkt;
+        text/x-asm    s;
       }
       charset utf-8;
-      charset_types text/x-agda;
+      charset_types text/x-agda text/x-scheme text/x-asm;
+      dav_ext_lock_zone zone=foo:10m;
     '';
 
     virtualHosts.localhost = {
