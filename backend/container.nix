@@ -110,7 +110,7 @@ in {
     # so nginx can serve /~foo/bar.agda (also read-write using DAV)
 
     package = pkgs.nginxMainline.override {
-      modules = with pkgs.nginxModules; [ brotli dav lua develkit ];
+      modules = with pkgs.nginxModules; [ brotli dav develkit moreheaders ];
     };
 
     # important to prevent annoying reconnects
@@ -146,18 +146,18 @@ in {
           root = agdapad-static;
           extraConfig = ''
             expires 3h;
-            set_by_lua_block $do_preconnect {
-              local f = io.open("/loadavg")
-              local line = f:read("*line")
-              f:close()
-              local l1 = string.match(line, "([%d]*%.[%d]*)%s")
-              if tonumber(l1) >= 2 then
-                return "0"
-              else
-                return "1"
-              end
-            }
-            sub_filter '"__DO_PRECONNECT__"' $do_preconnect;
+#            set_by_lua_block $do_preconnect {
+#              local f = io.open("/loadavg")
+#              local line = f:read("*line")
+#              f:close()
+#              local l1 = string.match(line, "([%d]*%.[%d]*)%s")
+#              if tonumber(l1) >= 2 then
+#                return "0"
+#              else
+#                return "1"
+#              end
+#            }
+#            sub_filter '"__DO_PRECONNECT__"' $do_preconnect;
           '';
         };
         "/__tty" = {
