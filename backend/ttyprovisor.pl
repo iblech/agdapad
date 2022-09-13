@@ -43,6 +43,7 @@ sub create_session {
     cd /etc/containers
     if mkdir /home/$session 2>/dev/null; then
       cp -Ta --reflink=auto /home/.skeleton /home/$session
+      mkdir -p /home/$session/.session-name/$session
       chown 10000 /home/$session
     fi
     < ttyskeleton.conf sed -e 's+/home/\.skeleton+/home/$session+g' -e 's+__SESSION_NAME__+$session+g' > ttybox-$id.conf

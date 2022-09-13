@@ -46,6 +46,7 @@ sub create_session {
     cd /etc/containers
     if mkdir /home/$session 2>/dev/null; then
       cp -Ta --reflink=auto /home/.skeleton /home/$session
+      mkdir -p /home/$session/.session-name/$session
       chown 10000 /home/$session
     fi
     < xskeleton.conf sed -e 's+/home/\.skeleton+/home/$session+g' -e 's+__SESSION_NAME__+$session+g' > xbox-$id.conf
@@ -197,6 +198,7 @@ sub acquire_session {
       warn "  Success, using hot spare $id.\n";
       reset_idletime($id);
       rename($hot_spare, "$ROOT/sessions/$session/$id") or die;
+      system("mkdir", "-p", "/home/$session/.session-name/$session");
       rmdir("$ROOT/sessions/.hot-spare-$id");
       return $id;
     } else {
@@ -218,6 +220,7 @@ sub acquire_session {
       reset_idletime($id);
       open my $fh, ">", "/home/.cold-spare-$id/.wait" or die;
       system("mount --bind /home/$session /home/.cold-spare-$id") == 0 or die;
+      system("mkdir", "-p", "/home/$session/.session-name/$session");
       print $fh "now\n" or die;
       close $fh or die;
       return $id;
