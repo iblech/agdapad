@@ -15,7 +15,7 @@ let
       sed -i -e 's/showbar\s*=\s*1/showbar = 0/' config.def.h
     '';
   });
-  myemacs = pkgs.emacsWithPackages (epkgs: [ epkgs.polymode epkgs.markdown-mode epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme epkgs.color-theme-sanityinc-tomorrow ]);
+  myemacs = pkgs.emacs.pkgs.withPackages (epkgs: [ epkgs.polymode epkgs.markdown-mode epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme epkgs.color-theme-sanityinc-tomorrow ]);
   myemacs-nox = pkgs.emacs-nox.pkgs.withPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme epkgs.color-theme-sanityinc-tomorrow ]);
   myagda = pkgs.agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories ]);
 in {
@@ -51,7 +51,7 @@ in {
     serviceConfig = {
       ExecStart = "${pkgs.websocat}/bin/websocat -e -E --binary ws-l:0.0.0.0:6080 sh-c:${agdapad-package}/xprovisor.pl";
     };
-    path = with pkgs; [ bash perl coreutils utillinux xprintidle-ng xdotool netcat ];
+    path = with pkgs; [ bash perl coreutils util-linux xprintidle-ng xdotool netcat ];
   };
 
   systemd.services.xprovisor-maint = {
@@ -61,7 +61,7 @@ in {
       ExecStart = "${agdapad-package}/xprovisor.pl";
       Environment = "WEBSOCAT_URI=/?maintainance";
     };
-    path = with pkgs; [ bash perl coreutils utillinux xprintidle-ng xdotool netcat ];
+    path = with pkgs; [ bash perl coreutils util-linux xprintidle-ng xdotool netcat ];
   };
 
   systemd.timers.xprovisor-maint = {
@@ -77,7 +77,7 @@ in {
       MemoryMax = "3G";
       ExecStart = "${myttyd}/bin/ttyd -b /__tty -a ${agdapad-package}/ttyprovisor.pl";
     };
-    path = with pkgs; [ bash perl systemd utillinux coreutils shadow.su tmux myemacs-nox ];
+    path = with pkgs; [ bash perl systemd util-linux coreutils shadow.su tmux myemacs-nox ];
   };
 
   systemd.services.ttyprovisor-maint = {
@@ -86,7 +86,7 @@ in {
       Type = "oneshot";
       ExecStart = "${agdapad-package}/ttyprovisor.pl .maintainance";
     };
-    path = with pkgs; [ bash perl systemd utillinux coreutils shadow.su tmux myemacs-nox ];
+    path = with pkgs; [ bash perl systemd util-linux coreutils shadow.su tmux myemacs-nox ];
   };
 
   systemd.timers.ttyprovisor-maint = {
