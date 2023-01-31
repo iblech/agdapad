@@ -96,7 +96,7 @@ in {
   };
 
   services.openssh.enable = true;
-  services.openssh.permitRootLogin = "yes";
+  services.openssh.settings.PermitRootLogin = "yes";
 
   users.users.guest = { isNormalUser = true; description = "Guest"; home = "/home/guest"; uid = 10000; };
 
