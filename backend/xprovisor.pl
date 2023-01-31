@@ -173,10 +173,17 @@ sub clean_obsolete_machines {
   for my $id (glob "$ROOT/clean/*") {
     $id = (split "/", $id)[-1];
 
-    unless(get_leader($id)) {
+    my $pid = get_leader($id);
+
+    unless($pid) {
       warn "* Machine $id has stopped; cleaning its files.\n";
       system("rm", "-rf", "/var/lib/containers/xbox-$id");
       rmdir "$ROOT/clean/$id";
+    } else {
+      # Sometimes nsenter processes hang around in a stopped state and block
+      # removal from the systemd machine list. This is an attempt to work
+      # around this issue.
+      system("ps xua | grep nsente[r] | grep $pid | awk '{ print \$2 }' | xargs kill -CONT");
     }
   }
 }
@@ -247,6 +254,11 @@ if($ENV{WEBSOCAT_URI} =~ /\?maintainance/) {
   clean_obsolete_machines();
   setup_hot_spares();
   setup_cold_spares();
+  exit;
+}
+
+if($ENV{WEBSOCAT_URI} =~ /\?terminate/) {
+  system("for i in \$(machinectl | awk '{ print \$1 }' | grep -- -); do machinectl terminate \$i; done");
   exit;
 }
 

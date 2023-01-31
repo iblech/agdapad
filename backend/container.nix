@@ -51,7 +51,7 @@ in {
     serviceConfig = {
       ExecStart = "${pkgs.websocat}/bin/websocat -e -E --binary ws-l:0.0.0.0:6080 sh-c:${agdapad-package}/xprovisor.pl";
     };
-    path = with pkgs; [ bash perl coreutils util-linux xprintidle-ng xdotool netcat ];
+    path = with pkgs; [ bash perl coreutils util-linux xprintidle-ng xdotool netcat gawk procps ];
   };
 
   systemd.services.xprovisor-maint = {
@@ -61,7 +61,7 @@ in {
       ExecStart = "${agdapad-package}/xprovisor.pl";
       Environment = "WEBSOCAT_URI=/?maintainance";
     };
-    path = with pkgs; [ bash perl coreutils util-linux xprintidle-ng xdotool netcat ];
+    path = with pkgs; [ bash perl coreutils util-linux xprintidle-ng xdotool netcat gawk procps ];
   };
 
   systemd.timers.xprovisor-maint = {
@@ -93,6 +93,19 @@ in {
     wantedBy = [ "timers.target" ];
     description = "ttymaint";
     timerConfig = { OnCalendar = "*:0/1"; };
+  };
+
+  systemd.services.terminate-before-shutdown = {
+    description = "terminate-before-shutdown";
+    before = [ "shutdown.target" ];
+    wantedBy = [ "shutdown.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${agdapad-package}/xprovisor.pl";
+      Environment = "WEBSOCAT_URI=/?terminate";
+      TimeoutStartSec = "0";
+    };
+    path = with pkgs; [ bash perl coreutils util-linux xprintidle-ng xdotool netcat gawk procps ];
   };
 
   services.openssh.enable = true;
