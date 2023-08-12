@@ -144,6 +144,7 @@
         document.getElementById("clipboard-autosync").onclick = function () {
             if(! navigator.clipboard.readText) return;
             document.getElementById("clipboard-autosync").disabled = true;
+            document.getElementById("clipboard").disabled = true;
             autosyncClipboard();
         };
 
