@@ -25,7 +25,8 @@
   \bN \alpha \to   math symbols
 
   "C-c" means "<Ctrl key> + c". In case your browser is intercepting C-c,
-  you can also use C-u. For pasting code into the Agdapad, see the clipboard
+  you can also use C-o. In case your browser in intercepting C-SPC, you can
+  also use C-p. For pasting code into the Agdapad, see the clipboard
   icon in the lower right corner.
 
   In text mode, use <F10> to access the menu bar, not the mouse.
