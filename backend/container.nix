@@ -202,6 +202,7 @@ in {
     config =
       { config, pkgs, ... }:
       {
+        system.stateVersion = "${config.system.nixos.release}";
         services.journald.extraConfig = ''
           Storage=volatile
           RuntimeMaxUse=1M
@@ -263,6 +264,7 @@ in {
     config =
       { config, pkgs, ... }:
       {
+        system.stateVersion = "${config.system.nixos.release}";
         services.journald.extraConfig = ''
           Storage=volatile
           RuntimeMaxUse=1M
