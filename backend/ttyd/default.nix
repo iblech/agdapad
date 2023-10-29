@@ -39,6 +39,13 @@ stdenv.mkDerivation rec {
         yarn config --offline set yarn-offline-mirror ${offline_cache}
         ${fixup_yarn_lock}/bin/fixup_yarn_lock yarn.lock
 
+        (
+          while :; do
+            sed -ie 's/"rU")/"r")/' ./node_modules/node-gyp/gyp/pylib/gyp/input.py && break
+            sleep 0.1
+          done
+        ) &
+
         export npm_config_nodedir=${nodejs-slim}
         yarn install --offline --no-progress
 
