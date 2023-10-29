@@ -253,6 +253,8 @@ in {
           description = "poweroff after VNC logout";
           serviceConfig = { ExecStart = "${pkgs.systemd}/bin/poweroff"; };
         };
+
+        documentation.doc.enable = false;
       };
     ephemeral = true;
     privateNetwork = true;
@@ -282,10 +284,14 @@ in {
         programs.bash.enableCompletion = false;
 
         users.users.guest = { isNormalUser = true; description = "Guest"; home = "/home/guest"; uid = 10000; };
+
+        documentation.doc.enable = false;
       };
     ephemeral = true;
     privateNetwork = true;
     bindMounts = { "/home/guest" = { hostPath = "/home/.skeleton"; isReadOnly = false; }; };
     extraFlags = [ "--setenv=AGDAPAD_SESSION_NAME=__SESSION_NAME__" ];
   };
+
+  documentation.doc.enable = false;
 }
