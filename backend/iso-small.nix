@@ -8,8 +8,7 @@ let
   slimAgda = pkgs.callPackage ./slim-agda.nix {};
 in {
   imports = [
-    <nixpkgs/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix>
-    <nixpkgs/nixos/modules/installer/cd-dvd/channel.nix>
+    <nixpkgs/nixos/modules/installer/cd-dvd/installation-cd-base.nix>
   ];
 
   services.journald.extraConfig = ''
@@ -21,7 +20,12 @@ in {
   boot.loader.timeout = lib.mkForce 2;
   boot.supportedFilesystems = lib.mkForce [ "btrfs" "ext4" "vfat" "ntfs" "cifs" ];
 
+  services.logrotate.enable = false;
+
   isoImage.appendToMenuLabel = " Live System";
+
+  documentation.enable = false;
+  documentation.doc.enable = false;
 
   i18n.supportedLocales = [ "en_US.UTF-8/UTF-8" ];
 
@@ -36,7 +40,7 @@ in {
   fonts.fontconfig.enable = lib.mkForce true;
 
   environment.systemPackages = with pkgs; [
-    bash vim firefoxWrapper sshfs git screen socat
+    bash vim firefox sshfs git screen socat
     (emacsWithPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme ]))
     (slimAgda)
   ];

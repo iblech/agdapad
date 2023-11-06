@@ -6,10 +6,15 @@
 let
   agdapad-package = pkgs.callPackage ./package.nix {};
   slimAgda = pkgs.callPackage ./slim-agda.nix {};
+  myemacs = pkgs.emacsWithPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme epkgs.polymode epkgs.markdown-mode epkgs.color-theme-sanityinc-tomorrow ]);
+  mydwm = pkgs.dwm.overrideAttrs (oldAttrs: rec {
+    postPatch = ''
+      sed -i -e 's/showbar\s*=\s*1/showbar = 0/' config.def.h
+    '';
+  });
 in {
   imports = [
-    <nixpkgs/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix>
-    <nixpkgs/nixos/modules/installer/cd-dvd/channel.nix>
+    <nixpkgs/nixos/modules/installer/cd-dvd/installation-cd-base.nix>
   ];
 
   services.journald.extraConfig = ''
@@ -18,59 +23,76 @@ in {
   '';
   boot.kernel.sysctl = { "vm.dirty_writeback_centisecs" = 6000; };
   boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.loader.timeout = lib.mkForce 2;
+  boot.supportedFilesystems = lib.mkForce [];
+
+  services.logrotate.enable = false;
+
+  isoImage.appendToMenuLabel = " Live System";
+
+  documentation.enable = false;
+  documentation.doc.enable = false;
 
   i18n.supportedLocales = [ "en_US.UTF-8/UTF-8" ];
-  hardware.enableRedistributableFirmware = lib.mkForce false;
 
   networking = {
     hostName = "lovelace";
     firewall.enable = false;
-    networkmanager.enable = true;
+    networkmanager.enable = false;
     networkmanager.wifi.powersave = true;
     wireless.enable = false;
   };
 
   fonts.fontconfig.enable = lib.mkForce true;
 
+  programs.bash.enableCompletion = false;
+
   environment.systemPackages = with pkgs; [
-    bash vim sshfs git screen socat
-    (emacsWithPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme ]))
+    bash vim sshfs git screen socat mydwm
+    (myemacs)
     (slimAgda)
   ];
 
-  fonts.fonts = with pkgs; [ ubuntu_font_family ];
-
-  users.users.ada = {
-    isNormalUser = true;
-    description = "Ada Lovelace";
-    createHome = true;
-    home = "/home/ada";
-    uid = 1000;
-    initialHashedPassword = "$6$utLZPDNys$nxpqRBobo7NAi9kFs7J8Ar5UN2zJY97.tuavJyk1ACyVoELeUwS3AtU7eCPq.R3Yxtb3GvmpuOuH0xrww0pdp.";
-  };
-
   boot.postBootCommands = ''
-    cd /home/ada
+    cd /root
     cp --no-preserve=mode -nrT ${agdapad-package}/skeleton-home .
-    mkdir -p /home/ada/.config/autostart
-    ln -s ${agdapad-package}/emacs-agda.desktop /home/ada/.config/autostart/
-    chown -R ada.users .
+    mkdir -p /root/.config/autostart
+    ln -s ${agdapad-package}/emacs-agda.desktop /home/root/.config/autostart/
   '';
 
   services.xserver = {
     enable = true;
-    desktopManager.xfce.enable = true;
-    displayManager = {
-      lightdm.enable = true;
-      autoLogin = {
-        enable = true;
-        user = "ada";
-      };
-    };
+    displayManager.startx.enable = true;
     libinput = {
       enable = true;
       touchpad.middleEmulation = true;
     };
+  };
+
+  systemd.services.agda = {
+    after = [ "graphical.target" ];
+    wantedBy = [ "graphical.target" ];
+    description = "agda";
+    script = ''
+      cookie=$(mcookie)
+      xauth -f /root/.Xauthority source - <<EOF
+      add lovelace:1 . $cookie
+      add lovelace/unix:1 . $cookie
+      EOF
+      # logic lifted from sx
+      trap 'DISPLAY=:1 exec ${agdapad-package}/xstartup.sh & wait "$!"' USR1
+      (trap "" USR1 && exec X :1 -noreset -auth /root/.Xauthority) & pid=$!
+      wait "$pid"
+    '';
+    serviceConfig = {
+      User = "root";
+      TTYPath = "/dev/tty7";
+      UtmpIdentifier = "tty7";
+      UtmpMode = "user";
+      StandardOutput = "journal";
+      ExecStartPre = "${pkgs.kbd}/bin/chvt 7";
+    };
+    path = with pkgs; [ bash util-linux xorg.xauth xorg.xorgserver coreutils mydwm myemacs xterm ];
   };
 
   hardware.opengl.enable = false;
