@@ -13,7 +13,7 @@ if [ -e .wait ]; then
   cp $tempdir/.* .
 fi
 
-cp --reflink=auto --no-preserve=mode -nrT @out@/skeleton-home .
+cp --reflink=auto --no-preserve=mode --update=none -rT @out@/skeleton-home .
 
 while :; do
   numberOfClients=$(ps xua | grep "nc localhos[t]" | wc -l)
