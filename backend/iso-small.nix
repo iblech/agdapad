@@ -45,6 +45,8 @@ in {
     (slimAgda)
   ];
 
+  nixpkgs.config.firefox.speechSynthesisSupport = false;
+
   fonts.fonts = with pkgs; [ ubuntu_font_family ];
 
   users.users.ada = {

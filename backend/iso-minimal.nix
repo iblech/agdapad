@@ -48,7 +48,7 @@ in {
   programs.bash.enableCompletion = false;
 
   environment.systemPackages = with pkgs; [
-    bash vim sshfs git screen socat mydwm
+    bash vim sshfs screen socat mydwm
     (myemacs)
     (slimAgda)
   ];

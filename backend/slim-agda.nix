@@ -1,10 +1,10 @@
-{ lib, stdenv, agda }:
+{ lib, stdenvNoCC, agda }:
 
 let
   agdaWithPackages = agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories ]);
 in
 
-stdenv.mkDerivation rec {
+stdenvNoCC.mkDerivation rec {
   name = "agda-slim"; 
   src = ./.;
 
