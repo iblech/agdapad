@@ -17,7 +17,7 @@ let
   });
   myemacs = pkgs.emacs.pkgs.withPackages (epkgs: [ epkgs.polymode epkgs.markdown-mode epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme epkgs.color-theme-sanityinc-tomorrow ]);
   myemacs-nox = pkgs.emacs-nox.pkgs.withPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme epkgs.color-theme-sanityinc-tomorrow ]);
-  myagda = pkgs.agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories ]);
+  myagda = (import (builtins.fetchTarball "https://github.com/NixOS/nixpkgs/archive/d8a4ff618f43da523a3293243c68a178e64c8cb5.tar.gz") {}).agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories ]);
 in {
   services.journald.extraConfig = ''
     Storage=volatile
