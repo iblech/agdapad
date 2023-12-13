@@ -6,7 +6,7 @@ in
 
 stdenvNoCC.mkDerivation rec {
   name = "agda-slim"; 
-  src = ./.;
+  dontUnpack = true;
 
   installPhase = ''
     mkdir -p $out/bin
