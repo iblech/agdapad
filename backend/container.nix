@@ -3,7 +3,11 @@
 let
   agdapad-package = pkgs.callPackage ./package.nix {};
   agdapad-static  = pkgs.callPackage ./static.nix {};
-  myttyd = (pkgs.callPackage ./ttyd/default.nix {}).overrideAttrs (oldAttrs: rec {
+  myttyd = pkgs.ttyd.overrideAttrs (oldAttrs: rec {
+    # Unfortunately, this postPatch hook will not have any effect, as the ttyd
+    # package in nixpkgs uses an upstream-provided compiled blob instead of
+    # regenerating from index.tsx. There is a custom version of ttyd in the
+    # repository history, but this proved too much effort to maintain.
     postPatch = ''
       sed -ie "/window.addEventListener('beforeunload', this.onWindowUnload);/ d" html/src/components/terminal/index.tsx
       sed -ie "s/Connection Closed/Connection closed/" html/src/components/terminal/index.tsx
@@ -75,7 +79,7 @@ in {
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       MemoryMax = "3G";
-      ExecStart = "${myttyd}/bin/ttyd -b /__tty -a ${agdapad-package}/ttyprovisor.pl";
+      ExecStart = "${myttyd}/bin/ttyd -W -b /__tty -a ${agdapad-package}/ttyprovisor.pl";
     };
     path = with pkgs; [ bash perl systemd util-linux coreutils shadow.su tmux myemacs-nox ];
   };
