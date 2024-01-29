@@ -220,7 +220,7 @@ in {
         hardware.pulseaudio.enable = true;
 
         environment.systemPackages = with pkgs; [
-          tigervnc myemacs myagda screenkey st mydwm netcat xosd
+          tigervnc myemacs myagda screenkey st mydwm netcat xosd killall
         ];
 
         fonts.fontconfig.enable = true;
