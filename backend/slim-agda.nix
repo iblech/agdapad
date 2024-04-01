@@ -1,7 +1,7 @@
 { lib, stdenvNoCC, agda }:
 
 let
-  agdaWithPackages = agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories ]);
+  agdaWithPackages = agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories p._1lab ]);
 in
 
 stdenvNoCC.mkDerivation rec {
