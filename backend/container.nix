@@ -264,7 +264,12 @@ in {
       };
     ephemeral = true;
     privateNetwork = true;
-    bindMounts = { "/home/guest" = { hostPath = "/home/.skeleton"; isReadOnly = false; }; };
+    bindMounts =
+      # The reference to /home/.skeleton will be changed by xprovisor.pl
+      # before actually instantiating the container
+      { "/home/guest" = { hostPath = "/home/.skeleton"; isReadOnly = false; };
+        "/home/guest/shared-files" = { hostPath = "/home/.shared-files"; isReadOnly = false; };
+      };
     extraFlags = [ "--setenv=AGDAPAD_SESSION_NAME=__SESSION_NAME__" ];
   };
 
@@ -295,7 +300,12 @@ in {
       };
     ephemeral = true;
     privateNetwork = true;
-    bindMounts = { "/home/guest" = { hostPath = "/home/.skeleton"; isReadOnly = false; }; };
+    # The reference to /home/.skeleton will be changed by ttyprovisor.pl
+    # before actually instantiating the container
+    bindMounts =
+      { "/home/guest" = { hostPath = "/home/.skeleton"; isReadOnly = false; };
+        "/home/guest/shared-files" = { hostPath = "/home/.shared-files"; isReadOnly = false; };
+      };
     extraFlags = [ "--setenv=AGDAPAD_SESSION_NAME=__SESSION_NAME__" ];
   };
 

@@ -249,6 +249,14 @@ unless(-d "/home/.skeleton") {
   exit 1;
 }
 
+unless(-d "/home/.shared-files") {
+  system("
+    set -e
+    mkdir -p /home/.shared-files
+    chown 10000 /home/.shared-files
+  ") == 0 or die;
+}
+
 if($ENV{WEBSOCAT_URI} =~ /\?maintainance/) {
   terminate_idle_sessions();
   clean_obsolete_machines();
