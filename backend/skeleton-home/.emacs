@@ -26,3 +26,7 @@
 (setq evil-default-state 'emacs)
 (setq evil-want-fine-undo 't)
 (evil-mode 1)
+
+(require 'use-proxy)
+(url-handler-mode 1)
+(use-proxy-mode)
