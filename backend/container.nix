@@ -228,7 +228,7 @@ in {
         fonts.fontconfig.enable = true;
         fonts.packages = with pkgs; [ hack-font ubuntu_font_family ];
 
-        programs.bash.enableCompletion = false;
+        programs.bash.completion.enable = false;
 
         users.users.guest = { isNormalUser = true; description = "Guest"; home = "/home/guest"; uid = 10000; };
 
@@ -292,7 +292,7 @@ in {
           bash perl tmux vim myemacs-nox myagda
         ];
 
-        programs.bash.enableCompletion = false;
+        programs.bash.completion.enable = false;
 
         users.users.guest = { isNormalUser = true; description = "Guest"; home = "/home/guest"; uid = 10000; };
 
