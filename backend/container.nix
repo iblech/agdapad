@@ -21,7 +21,7 @@ let
   });
   myemacs = pkgs.emacs.pkgs.withPackages (epkgs: [ epkgs.polymode epkgs.markdown-mode epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme epkgs.color-theme-sanityinc-tomorrow epkgs.use-proxy ]);
   myemacs-nox = pkgs.emacs-nox.pkgs.withPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme epkgs.color-theme-sanityinc-tomorrow epkgs.use-proxy ]);
-  myagda = pkgs.agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories p._1lab ]);
+  myagda = pkgs.agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories p._1lab p.generics p.functional-linear-algebra ]);
 in {
   services.journald.extraConfig = ''
     Storage=volatile
@@ -43,11 +43,6 @@ in {
   # Without this option, nix-build would rightfully complain about missing file
   # system information.
   boot.isContainer = true;
-
-  # When creating an lxc image using a command like `nixos-generate -c container.nix -f lxc`,
-  # the file nixos/virtualisation/lxc-container.nix is included, thereby
-  # enabling this option. We require it to be false, though.
-  environment.noXlibs = false;
 
   systemd.services.xprovisor = {
     description = "xprovisor";
@@ -219,7 +214,7 @@ in {
         networking.hostName = "ada";
         networking.firewall.enable = false;
 
-        hardware.pulseaudio.enable = true;
+        hardware.pulseaudio.enable = false;
 
         environment.systemPackages = with pkgs; [
           tigervnc myemacs myagda screenkey st mydwm netcat xosd killall
@@ -261,6 +256,7 @@ in {
         };
 
         documentation.doc.enable = false;
+        services.speechd.enable = false;
       };
     ephemeral = true;
     privateNetwork = true;
@@ -297,6 +293,7 @@ in {
         users.users.guest = { isNormalUser = true; description = "Guest"; home = "/home/guest"; uid = 10000; };
 
         documentation.doc.enable = false;
+        services.speechd.enable = false;
       };
     ephemeral = true;
     privateNetwork = true;
