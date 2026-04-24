@@ -135,16 +135,16 @@ in {
     commonHttpConfig = ''
       brotli on;
       brotli_static on;
-      brotli_types application/json application/javascript application/xml application/xml+rss image/svg+xml text/css text/javascript text/plain text/xml text/x-agda text/x-scheme;
+      brotli_types application/json application/javascript application/xml application/xml+rss image/svg+xml text/css text/javascript text/plain text/xml text/x-agda text/x-scheme text/markdown;
       zstd on;
-      zstd_types application/json application/javascript application/xml application/xml+rss image/svg+xml text/css text/javascript text/plain text/xml text/x-agda text/x-scheme;
+      zstd_types application/json application/javascript application/xml application/xml+rss image/svg+xml text/css text/javascript text/plain text/xml text/x-agda text/x-scheme text/markdown;
       types {
         text/x-agda   agda lagda;
         text/x-scheme scm rkt;
         text/x-asm    s;
       }
       charset utf-8;
-      charset_types text/x-agda text/x-scheme text/x-asm;
+      charset_types text/x-agda text/x-scheme text/x-asm text/markdown;
       dav_ext_lock_zone zone=foo:10m;
     '';
 
