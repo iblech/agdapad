@@ -214,14 +214,14 @@ in {
         networking.hostName = "ada";
         networking.firewall.enable = false;
 
-        hardware.pulseaudio.enable = false;
+        services.pulseaudio.enable = false;
 
         environment.systemPackages = with pkgs; [
           tigervnc myemacs myagda screenkey st mydwm netcat xosd killall
         ];
 
         fonts.fontconfig.enable = true;
-        fonts.packages = with pkgs; [ hack-font ubuntu_font_family ];
+        fonts.packages = with pkgs; [ hack-font ubuntu-classic ];
 
         programs.bash.completion.enable = false;
 
@@ -241,7 +241,7 @@ in {
             ExecStart = "${agdapad-package}/vncinit.sh";
           };
           postStop = "${agdapad-package}/vncdown.sh";
-          path = with pkgs; [ bash util-linux xorg.xauth tigervnc netcat coreutils mydwm myemacs ];
+          path = with pkgs; [ bash util-linux xauth tigervnc netcat coreutils mydwm myemacs ];
         };
 
         systemd.paths.poweroff = {
