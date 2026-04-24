@@ -182,5 +182,3 @@ to `/etc/nixos/configuration.nix`.
 * virtual keypad on mobile
 * system image for offline work
 * ssh access
-* document viewonly mode
-* document `/~foo/bar.agda` http read-only access and read-write access using WebDAV

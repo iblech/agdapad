@@ -412,13 +412,30 @@
         an extraordinate amount of time.</p>
         <p>This service is provided free of charge and comes without any guarantees.
         It might vanish at any point. Your Agda programs are stored on the
-        server, unencrypted, but no personal identifying data is recorded. Please <a
-        href="mailto:iblech@speicherleck.de">notify me</a> with any security
+        server, unencrypted, but no personal identifying data is recorded. Please
+        notify me with any security
         concerns you discover.</p>
         <p>A NixOS package for self-hosting this server <a
         href="https://www.github.com/iblech/agdapad">is available here</a>
         (AGPL-licensed). You can also access this
         server <a href="#__native">using a native VNC viewer</a>.</p>
+
+        <h2>Downloading and uploading Agda code</h2>
+        <p>You can download code you wrote in the Agdapad using the address
+        <code>https://<span class="hostname">agdapad.quasicoherent.io</span>/~<em>SessionName</em></code>.
+        In principle, you can also upload code by mounting this address as a
+        WebDAV share, however the implementation is flaky.</p>
+
+        <h2>View-only mode</h2>
+        <p>For preventing accidental input, for instance when sharing an
+        Agdapad session with collaborators, you can add <code>/viewonly</code>
+        at the end of the URL, i.e. navigate to
+        <code>https://<span class="hostname">agdapad.quasicoherent.io</span>/#<em>SessionName</em>/viewonly</code>.</p>
+
+        <h2>Virtual keyboard on mobile</h2>
+        <p>If you want to use the Agdapad on mobile and hence need a virtual
+        keyboard, the quickest way is to use this link:
+        <code>https://novnc.com/noVNC/vnc.html#host=<span class="hostname">agdapad.quasicoherent.io</span>&amp;port=443&amp;encrypt=1&amp;autoconnect=1&amp;reconnect=1&amp;resize=scale&amp;compression=9&amp;viewonly=0&amp;path=__vnc/<em>SessionName</em></code></p>
 
         <h2>Installing Agda on your local computer</h2>
         <p>For larger experiments, Agda is more fun if you install it locally
@@ -443,7 +460,7 @@
     <div id="__native" class="subpage">
         <h2>Using a native VNC viewer</h2>
         <p>Simply direct your favorite VNC viewer to the address
-        <code>wss://<span id="hostname1">agdapad.quasicoherent.io</span>/__vnc/<em>SessionName</em></code>.</p>
+        <code>wss://<span class="hostname">agdapad.quasicoherent.io</span>/__vnc/<em>SessionName</em></code>.</p>
         <p>However, most
         VNC clients do not support the WebSocket protocol, the <a
         href="https://novnc.com/">noVNC client</a> being a notable
@@ -452,7 +469,7 @@
         Linux distributions) can do this for you:</p>
         <ol>
             <li>Run <code>websocat --binary tcp-l:127.0.0.1:5901
-            wss://<span id="hostname2">agdapad.quasicoherent.io</span>/__vnc/<em>SessionName</em></code>.</li>
+            wss://<span class="hostname">agdapad.quasicoherent.io</span>/__vnc/<em>SessionName</em></code>.</li>
             <li>Direct your VNC viewer to <code>localhost:1</code>.</li>
         </ol>
     </div>
@@ -472,8 +489,9 @@
 </form>
 
 <script>
-    document.getElementById('hostname1').innerText = window.location.hostname;
-    document.getElementById('hostname2').innerText = window.location.hostname;
+    for(const el of document.getElementsByClassName("hostname")) {
+        el.innerText = window.location.hostname;
+    }
 </script>
 
 </body>
