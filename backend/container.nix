@@ -3,17 +3,6 @@
 let
   agdapad-package = pkgs.callPackage ./package.nix {};
   agdapad-static  = pkgs.callPackage ./static.nix {};
-  myttyd = pkgs.ttyd.overrideAttrs (oldAttrs: rec {
-    # Unfortunately, this postPatch hook will not have any effect, as the ttyd
-    # package in nixpkgs uses an upstream-provided compiled blob instead of
-    # regenerating from index.tsx. There is a custom version of ttyd in the
-    # repository history, but this proved too much effort to maintain.
-    postPatch = ''
-      sed -ie "/window.addEventListener('beforeunload', this.onWindowUnload);/ d" html/src/components/terminal/index.tsx
-      sed -ie "s/Connection Closed/Connection closed/" html/src/components/terminal/index.tsx
-      sed -ie "s/document.title = data + ' | ' + this.title;/document.title = data;/" html/src/components/terminal/index.tsx
-   '';
-  });
   mydwm = pkgs.dwm.overrideAttrs (oldAttrs: rec {
     postPatch = ''
       sed -i -e 's/showbar\s*=\s*1/showbar = 0/' config.def.h
@@ -23,10 +12,10 @@ let
   myemacs-nox = pkgs.emacs-nox.pkgs.withPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme epkgs.color-theme-sanityinc-tomorrow epkgs.use-proxy ]);
   myagda = pkgs.agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories p._1lab p.generics p.functional-linear-algebra ]);
 in {
-  services.journald.extraConfig = ''
-    Storage=volatile
-    RuntimeMaxUse=20M
-  '';
+  services.journald.settings.Journal = {
+    Storage = "volatile";
+    RuntimeMaxUse = "20M";
+  };
 
   time.hardwareClockInLocalTime = true;
   networking.firewall.enable = false;
@@ -74,7 +63,7 @@ in {
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       MemoryMax = "3G";
-      ExecStart = "${myttyd}/bin/ttyd -W -b /__tty -a ${agdapad-package}/ttyprovisor.pl";
+      ExecStart = "${pkgs.ttyd}/bin/ttyd -W -b /__tty -a ${agdapad-package}/ttyprovisor.pl";
     };
     path = with pkgs; [ bash perl systemd util-linux coreutils shadow.su tmux myemacs-nox ];
   };
@@ -204,10 +193,10 @@ in {
       { config, pkgs, ... }:
       {
         system.stateVersion = "${config.system.nixos.release}";
-        services.journald.extraConfig = ''
-          Storage=volatile
-          RuntimeMaxUse=1M
-        '';
+        services.journald.settings.Journal = {
+          Storage = "volatile";
+          RuntimeMaxUse = "1M";
+        };
 
         time.hardwareClockInLocalTime = true;
 
@@ -274,10 +263,10 @@ in {
       { config, pkgs, ... }:
       {
         system.stateVersion = "${config.system.nixos.release}";
-        services.journald.extraConfig = ''
-          Storage=volatile
-          RuntimeMaxUse=1M
-        '';
+        services.journald.settings.Journal = {
+          Storage = "volatile";
+          RuntimeMaxUse = "1M";
+        };
 
         time.hardwareClockInLocalTime = true;
 

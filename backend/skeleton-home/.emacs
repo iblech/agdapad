@@ -1,4 +1,6 @@
-(load-file (let ((coding-system-for-read 'utf-8)) (shell-command-to-string "agda-mode locate")))
+;;; -*- lexical-binding: t -*-
+
+(load-file (let ((coding-system-for-read 'utf-8)) (shell-command-to-string "agda --emacs-mode locate")))
 
 (setq-default indent-tabs-mode nil)
 
