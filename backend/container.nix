@@ -48,7 +48,7 @@ in {
     description = "xprovisor";
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
-      ExecStart = "${pkgs.websocat}/bin/websocat -e -E --binary ws-l:0.0.0.0:6080 sh-c:${agdapad-package}/xprovisor.pl";
+      ExecStart = "${pkgs.websocat}/bin/websocat -e -E --binary --ping-interval 30 ws-l:0.0.0.0:6080 sh-c:${agdapad-package}/xprovisor.pl";
     };
     path = with pkgs; [ bash perl coreutils util-linux xprintidle-ng xdotool netcat gawk procps ];
   };
