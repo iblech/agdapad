@@ -100,9 +100,8 @@ sub is_living {
 # Terminate idle sessions (not any hot or cold spares, of course).
 sub terminate_idle_sessions {
   for my $machine (glob "$ROOT/sessions/*/*") {
-    next if $machine =~ /off/;
-
     my $id = (split "/", $machine)[-1];
+    next if $id =~ /off$/;
 
     my $pid = get_leader($id);
     unless($pid) {

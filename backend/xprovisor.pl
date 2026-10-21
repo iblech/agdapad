@@ -128,9 +128,8 @@ sub setup_cold_spares {
 sub terminate_idle_sessions {
   # the glob() won't return sessions of hot or cold spares, as these begin with a dot
   for my $machine (glob "$ROOT/sessions/*/*") {
-    next if $machine =~ /off/;
-
     my $id = (split "/", $machine)[-1];
+    next if $id =~ /off$/;
 
     my $pid = get_leader($id);
     unless($pid) {
