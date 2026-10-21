@@ -96,7 +96,7 @@ sub is_living {
 
   return if $id =~ /off/;
   return unless my $pid = get_leader($id);
-  return $pid if system("@{[ netcat($pid) ]} -z &>/dev/null") == 0;
+  return $pid if system("@{[ netcat($pid) ]} -z >/dev/null 2>&1") == 0;
   return;
 }
 
