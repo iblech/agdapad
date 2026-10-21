@@ -182,7 +182,7 @@ sub clean_obsolete_machines {
       # Sometimes nsenter processes hang around in a stopped state and block
       # removal from the systemd machine list. This is an attempt to work
       # around this issue.
-      system("ps xua | grep nsente[r] | grep $pid | awk '{ print \$2 }' | xargs kill -CONT");
+      system("ps xua | grep nsente[r] | awk -v pid=$pid '{ for(i = 11; i < NF; i++) if(\$i == \"-t\" && \$(i+1) == pid) print \$2 }' | xargs -r kill -CONT");
     }
   }
 }
