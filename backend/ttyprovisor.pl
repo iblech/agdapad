@@ -191,7 +191,7 @@ for(1..2) {
   # Wait for up to ten seconds for a session to show up.
   my @machines;
   for(my $i = 0; $i < 100; $i++) {
-    @machines = sort glob "*";
+    @machines = sort { ($a =~ /off$/) <=> ($b =~ /off$/) or $a cmp $b } glob "*";
     last if @machines;
     sleep 0.1;
   }
