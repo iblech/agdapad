@@ -58,7 +58,13 @@ sub create_session {
     systemctl start container\@xbox-$id.service
   ") == 0 or die;
 
-  sleep 0.1 until is_living($id);
+  my $attempt = 0;
+  while(1) {
+    last if is_living($id);
+    die if $attempt > 250;
+    sleep 0.1;
+    $attempt++;
+  }
 
   mkdir "$ROOT/sessions";
   mkdir "$ROOT/sessions/$session";
