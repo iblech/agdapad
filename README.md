@@ -133,6 +133,8 @@ to `/etc/nixos/configuration.nix`.
          proxy_send_timeout 600;
          proxy_read_timeout 600;
          proxy_http_version 1.1;
+         client_max_body_size 500m;
+         proxy_request_buffering off;
       '';
       virtualHosts."agdapad.quasicoherent.io" = {
         forceSSL = true;

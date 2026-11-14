@@ -108,10 +108,10 @@ in {
     recommendedOptimisation = true;
 
     user = "guest";
-    # so nginx can serve /~foo/bar.agda (also read-write using DAV)
+    # so nginx can serve /~foo/bar.agda
 
     package = pkgs.nginxMainline.override {
-      modules = with pkgs.nginxModules; [ brotli dav develkit moreheaders zstd ];
+      modules = with pkgs.nginxModules; [ brotli develkit moreheaders zstd ];
     };
 
     # important to prevent annoying reconnects
@@ -134,7 +134,11 @@ in {
       }
       charset utf-8;
       charset_types text/x-agda text/x-scheme text/x-asm text/markdown;
-      dav_ext_lock_zone zone=foo:10m;
+      map $request_method $agdapad_is_dav {
+        GET     0;
+        HEAD    0;
+        default 1;
+      }
     '';
 
     virtualHosts.localhost = {
@@ -171,14 +175,26 @@ in {
           proxyPass = "http://localhost:6080";
           proxyWebsockets = true;
         };
-        "~ ^/~(\\w+)(\\/.*)?$" = {  # exclude both ".."-style enumeration attacks and access to ".skeleton", ".hot-spare-*" etc.
-          alias = "/home/$1$2";
+        "~ ^/~(?<agdapad_session>\\w+)(?<agdapad_path>/.*)?$" = {  # exclude both ".."-style enumeration attacks and access to ".skeleton", ".hot-spare-*" etc.
+          alias = "/home/$agdapad_session$agdapad_path";
           extraConfig = ''
             expires epoch;
             autoindex on;
-            dav_methods     PUT DELETE MKCOL COPY MOVE;
-            dav_ext_methods PROPFIND OPTIONS;
-            dav_access      user:rw group:rw all:r;
+            disable_symlinks on;
+            # Apache computes ETags differently, don't want mismatches
+            etag off;
+            client_max_body_size 500m;
+            error_page 418 = @dav;
+            if ($agdapad_is_dav) {
+              return 418;
+            }
+          '';
+        };
+        "@dav" = {
+          proxyPass = "http://127.0.0.1:8080";
+          extraConfig = ''
+            client_max_body_size 500m;
+            proxy_request_buffering off;
           '';
         };
       };
@@ -187,6 +203,44 @@ in {
 
   # required so nginx can serve /~foo/bar.agda
   systemd.services.nginx.serviceConfig.ProtectHome = "no";
+
+  # WebDAV access to /~foo using Apache. nginx's DAV support is too incomplete.
+  services.httpd = {
+    enable = true;
+    user = "guest";
+    group = "users";
+    virtualHosts.dav = {
+      listen = [ { ip = "127.0.0.1"; port = 8080; } ];
+      extraConfig = ''
+        RequestHeader edit Destination ^(https?://[^/]+)?/ http://127.0.0.1:8080/ early
+
+        AliasMatch "^/~(\w+)(/.*)?$" "/home/$1$2"
+
+        DavLockDB /run/httpd/DavLock
+        DavMinTimeout 600
+
+        # 500 MiB
+        LimitRequestBody 524288000
+
+        <Directory "/home">
+          Dav On
+          # in particular no FollowSymLinks
+          Options None
+          AllowOverride None
+          Require all granted
+          DirectorySlash Off
+          DirectoryIndex disabled
+        </Directory>
+
+        # Limit actions on the home directory itself
+        <LocationMatch "^/~\w+/?$">
+          <Limit PUT DELETE MKCOL COPY MOVE>
+            Require all denied
+          </Limit>
+        </LocationMatch>
+      '';
+    };
+  };
 
   containers.xskeleton = {
     config =
