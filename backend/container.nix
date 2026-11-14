@@ -10,7 +10,19 @@ let
   });
   myemacs = pkgs.emacs.pkgs.withPackages (epkgs: [ epkgs.polymode epkgs.markdown-mode epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme epkgs.color-theme-sanityinc-tomorrow epkgs.use-proxy ]);
   myemacs-nox = pkgs.emacs-nox.pkgs.withPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme epkgs.color-theme-sanityinc-tomorrow epkgs.use-proxy ]);
-  myagda = pkgs.agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories p._1lab p.generics p.functional-linear-algebra ]);
+  padova2025 = pkgs.agdaPackages.mkDerivation {
+    pname = "padova2025";
+    version = "0.1";
+    src = pkgs.fetchFromGitHub {
+      owner = "iblech";
+      repo = "lets-play-agda";
+      rev = "bd627bff4abdcbdc653f704b39224ca9c38f8727";
+      hash = "sha256-ztrKpqSFVh9p0Vremjcsg0Id6T8nBldJU9MP1yAxsO0=";
+    };
+    buildInputs = [ pkgs.agdaPackages.cubical ];
+    meta = {};
+  };
+  myagda = pkgs.agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories p._1lab p.generics p.functional-linear-algebra padova2025 ]);
 in {
   services.journald.settings.Journal = {
     Storage = "volatile";
@@ -313,7 +325,12 @@ in {
       # The reference to /home/.skeleton will be changed by xprovisor.pl
       # before actually instantiating the container
       { "/home/guest" = { hostPath = "/home/.skeleton"; isReadOnly = false; };
+        "/torsock" = { hostPath = "/torsock"; isReadOnly = false; };
         "/home/guest/shared-files" = { hostPath = "/home/.shared-files"; isReadOnly = false; };
+        "/home/guest/MGS2024" = { hostPath = "/home/MGS2024"; isReadOnly = true; };
+        "/home/guest/Padova2024" = { hostPath = "/home/Padova2024"; isReadOnly = true; };
+        #"/home/guest/Padova2025" = { hostPath = "/home/Padova2025"; isReadOnly = true; };
+        "/home/guest/Verona2024" = { hostPath = "/home/Verona2024"; isReadOnly = true; };
       };
     extraFlags = [ "--setenv=AGDAPAD_SESSION_NAME=__SESSION_NAME__" ];
   };
@@ -351,6 +368,9 @@ in {
     bindMounts =
       { "/home/guest" = { hostPath = "/home/.skeleton"; isReadOnly = false; };
         "/home/guest/shared-files" = { hostPath = "/home/.shared-files"; isReadOnly = false; };
+        "/home/guest/MGS2024" = { hostPath = "/home/MGS2024"; isReadOnly = true; };
+        "/home/guest/Padova2024" = { hostPath = "/home/Padova2024"; isReadOnly = true; };
+        "/home/guest/Verona2024" = { hostPath = "/home/Verona2024"; isReadOnly = true; };
       };
     extraFlags = [ "--setenv=AGDAPAD_SESSION_NAME=__SESSION_NAME__" ];
   };

@@ -1,5 +1,13 @@
 ;;; -*- lexical-binding: t -*-
 
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+(autoload 'enable-paredit-mode "paredit" "Turn on pseudo-structural editing of Lisp code" t)
+(add-hook 'scheme-mode-hook #'enable-paredit-mode)
+(show-paren-mode t)
+(add-to-list 'auto-mode-alist '("\\.s[lp]s\\'" . scheme-mode))
+(package-initialize)
+
 (load-file (let ((coding-system-for-read 'utf-8)) (shell-command-to-string "agda --emacs-mode locate")))
 
 (setq-default indent-tabs-mode nil)

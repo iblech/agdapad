@@ -6,9 +6,9 @@ use Time::HiRes;
 
 my $ROOT               = "/root/x";
 my $NUM_HOT_SPARES     = 3;
-my $NUM_COLD_SPARES    = 1;
+my $NUM_COLD_SPARES    = 0;  # clashes with MGS2024 stuff
 my $NUM_TOTAL_SESSIONS = 100_000;
-my $MAX_IDLE_TIME      = 300;  # in seconds
+my $MAX_IDLE_TIME      = 900;  # in seconds
 my $MAX_CONCURRENT_MACHINES = 200;
 
 mkdir $ROOT;
@@ -42,6 +42,10 @@ sub create_session {
   $id = allocate_machine() unless $id;
   warn "* Spawning container $id for session $session...\n";
 
+  my $fixup_mgs2024_mount = $session eq "MGS2024" || $session eq "Padova2024" || $session eq "Padova2025" || $session eq "Verona2024"
+    ? "-e s/--bind-ro=/--bind=/g"
+    : "";
+
   system("
     set -e
     cd /etc/nixos-containers
@@ -54,7 +58,7 @@ sub create_session {
       echo '* Home directory for $session does not exist. Space issues?' >&2
       exit 1
     }
-    < xskeleton.conf sed -e 's+/home/\.skeleton+/home/$session+g' -e 's+__SESSION_NAME__+$session+g' > xbox-$id.conf
+    < xskeleton.conf sed $fixup_mgs2024_mount -e 's+/home/\.skeleton+/home/$session+g' -e 's+__SESSION_NAME__+$session+g' > xbox-$id.conf
     systemctl start container\@xbox-$id.service
   ") == 0 or die;
 
@@ -210,7 +214,8 @@ sub acquire_session {
   warn "* Acquiring a container for $session...\n";
 
   # Carry out one attempt of acquiring a hot spare.
-  if(not -d "/home/$session" and my $hot_spare = (glob "$ROOT/sessions/.hot-spare-*/*")[0]) {
+  # But only if session name does not start with "racket" or "mgs".
+  if(not $session =~ /^racket/ and not $session =~ /^mgs/ and not -d "/home/$session" and my $hot_spare = (glob "$ROOT/sessions/.hot-spare-*/*")[0]) {
     my $id = (split "/", $hot_spare)[-1];
     warn "  Trying to use hot spare $id...\n";
 
@@ -291,7 +296,7 @@ die unless length $session < 200;
 
 my $loadavg = 0 + `cat /proc/loadavg | cut -d' ' -f1`;
 warn "* Got request for session $session, current load average $loadavg.\n";
-die "Too much load" if $loadavg > 30;
+#die "Too much load" if $loadavg > 30;
 
 mkdir "$ROOT/sessions";
 

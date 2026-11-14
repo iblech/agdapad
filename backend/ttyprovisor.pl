@@ -39,6 +39,10 @@ sub create_session {
   $id = allocate_machine() unless $id;
   warn "* Spawning container $id for session $session...\n";
 
+  my $fixup_mgs2024_mount = $session eq "MGS2024" || $session eq "Padova2024" || $session eq "Padova2025" || $session eq "Verona2024"
+    ? "-e s/--bind-ro=/--bind=/g"
+    : "";
+
   system("
     set -e
     cd /etc/nixos-containers
@@ -51,7 +55,7 @@ sub create_session {
       echo '* Home directory for $session does not exist. Space issues?' >&2
       exit 1
     }
-    < ttyskeleton.conf sed -e 's+/home/\.skeleton+/home/$session+g' -e 's+__SESSION_NAME__+$session+g' > ttybox-$id.conf
+    < ttyskeleton.conf sed $fixup_mgs2024_mount -e 's+/home/\.skeleton+/home/$session+g' -e 's+__SESSION_NAME__+$session+g' > ttybox-$id.conf
     systemctl start container\@ttybox-$id.service
   ") == 0 or die;
 
