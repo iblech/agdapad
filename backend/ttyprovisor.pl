@@ -118,7 +118,7 @@ sub terminate_idle_sessions {
       next;
     }
 
-    my $idle = system(nsenter($pid), "perl", "-e", '
+    my $idle = system(nsenter($pid), qw< -S 10000 -G 100 perl -e >, '
       my @sockets = glob "/tmp/tmux-*/*";
       exit 0 if @sockets;
       exit 1;
@@ -170,7 +170,8 @@ unless(-d "/home/.shared-files") {
   ") == 0 or die;
 }
 
-if(defined $ARGV[0] and $ARGV[0] =~ /^\.maintainance/) {
+# Set by the systemd units, not controllable by clients (unlike @ARGV).
+if(($ENV{AGDAPAD_ACTION} // "") eq "maintainance") {
   terminate_idle_sessions();
   clean_obsolete_machines();
   exit;

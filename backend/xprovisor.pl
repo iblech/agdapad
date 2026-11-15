@@ -48,7 +48,7 @@ sub create_session {
     if mkdir /home/$session 2>/dev/null; then
       cp -Ta --reflink=auto /home/.skeleton /home/$session
       mkdir -p /home/$session/.session-name/$session
-      chown 10000 /home/$session
+      chown 10000 /home/$session /home/$session/.session-name
     fi
     stat /home/$session >/dev/null || {
       echo '* Home directory for $session does not exist. Space issues?' >&2
@@ -93,7 +93,7 @@ sub netcat {
   my $pid = shift;
   die unless $pid;
 
-  return qw< nsenter -a -t >, $pid, qw< nc -w >, $MAX_IDLE_TIME, qw< localhost 5901 >;
+  return qw< nsenter -a -S 10000 -G 100 -t >, $pid, qw< nc -w >, $MAX_IDLE_TIME, qw< localhost 5901 >;
 }
 
 # Check whether a VNC connection can be established to the given machine.
@@ -104,6 +104,12 @@ sub is_living {
   return unless my $pid = get_leader($id);
   return $pid if system("@{[ netcat($pid) ]} -z >/dev/null 2>&1") == 0;
   return;
+}
+
+sub mkdir_as_guest {
+  my $dir = shift;
+
+  system(qw< setpriv --reuid=10000 --regid=100 --clear-groups mkdir -p >, $dir);
 }
 
 # Spawn sufficiently many hot spares.
@@ -146,7 +152,7 @@ sub terminate_idle_sessions {
       next;
     }
 
-    my $idletime = `nsenter -a -t $pid /usr/bin/env DISPLAY=:1 XAUTHORITY=/home/guest/.Xauthority xprintidle-ng`;
+    my $idletime = `nsenter -a -S 10000 -G 100 -t $pid /usr/bin/env DISPLAY=:1 XAUTHORITY=/home/guest/.Xauthority xprintidle-ng`;
     if(not $idletime =~ /^\d+$/ or $idletime > $MAX_IDLE_TIME*1000) {
       warn "* Session $machine is idle, terminating...\n";
       rename($machine, $machine . "off");
@@ -167,7 +173,7 @@ sub reset_idletime {
 
   my $pid = get_leader($id) or return;
   return system(qw<
-    nsenter -a -t>, $pid, qw<
+    nsenter -a -S 10000 -G 100 -t>, $pid, qw<
     /usr/bin/env DISPLAY=:1 XAUTHORITY=/home/guest/.Xauthority
     xdotool mousemove 0 0 mousemove restore
   >) == 0;
@@ -215,7 +221,7 @@ sub acquire_session {
       warn "  Success, using hot spare $id.\n";
       reset_idletime($id);
       rename($hot_spare, "$ROOT/sessions/$session/$id") or die;
-      system("mkdir", "-p", "/home/$session/.session-name/$session");
+      mkdir_as_guest("/home/$session/.session-name/$session");
       rmdir("$ROOT/sessions/.hot-spare-$id");
       return $id;
     } else {
@@ -237,7 +243,7 @@ sub acquire_session {
       reset_idletime($id);
       open my $fh, ">", "/home/.cold-spare-$id/.wait" or die;
       system("mount --bind /home/$session /home/.cold-spare-$id") == 0 or die;
-      system("mkdir", "-p", "/home/$session/.session-name/$session");
+      mkdir_as_guest("/home/$session/.session-name/$session");
       print $fh "now\n" or die;
       close $fh or die;
       return $id;
@@ -262,7 +268,9 @@ unless(-d "/home/.shared-files") {
   ") == 0 or die;
 }
 
-if($ENV{WEBSOCAT_URI} =~ /\?maintainance/) {
+my $action = $ENV{AGDAPAD_ACTION} // "";
+
+if($action eq "maintainance") {
   terminate_idle_sessions();
   clean_obsolete_machines();
   setup_hot_spares();
@@ -270,7 +278,7 @@ if($ENV{WEBSOCAT_URI} =~ /\?maintainance/) {
   exit;
 }
 
-if($ENV{WEBSOCAT_URI} =~ /\?terminate/) {
+if($action eq "terminate") {
   system("for i in \$(machinectl | awk '{ print \$1 }' | grep -- -); do machinectl terminate \$i; done");
   exit;
 }

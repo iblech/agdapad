@@ -47,7 +47,7 @@ in {
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${agdapad-package}/xprovisor.pl";
-      Environment = "WEBSOCAT_URI=/?maintainance";
+      Environment = "AGDAPAD_ACTION=maintainance";
     };
     path = with pkgs; [ bash perl coreutils util-linux xprintidle-ng xdotool netcat gawk procps ];
   };
@@ -72,7 +72,8 @@ in {
     description = "ttymaint";
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${agdapad-package}/ttyprovisor.pl .maintainance";
+      ExecStart = "${agdapad-package}/ttyprovisor.pl";
+      Environment = "AGDAPAD_ACTION=maintainance";
     };
     path = with pkgs; [ bash perl systemd util-linux coreutils shadow.su tmux myemacs-nox ];
   };
@@ -90,14 +91,11 @@ in {
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${agdapad-package}/xprovisor.pl";
-      Environment = "WEBSOCAT_URI=/?terminate";
+      Environment = "AGDAPAD_ACTION=terminate";
       TimeoutStartSec = "0";
     };
     path = with pkgs; [ bash perl coreutils util-linux xprintidle-ng xdotool netcat gawk procps ];
   };
-
-  services.openssh.enable = true;
-  services.openssh.settings.PermitRootLogin = "yes";
 
   users.users.guest = { isNormalUser = true; description = "Guest"; home = "/home/guest"; uid = 10000; };
 
@@ -176,7 +174,7 @@ in {
           proxyWebsockets = true;
         };
         "~ ^/~(?<agdapad_session>\\w+)(?<agdapad_path>/.*)?$" = {  # exclude both ".."-style enumeration attacks and access to ".skeleton", ".hot-spare-*" etc.
-          alias = "/home/$agdapad_session$agdapad_path";
+          alias = "/web-home/$agdapad_session$agdapad_path";
           extraConfig = ''
             expires epoch;
             autoindex on;
@@ -204,6 +202,14 @@ in {
   # required so nginx can serve /~foo/bar.agda
   systemd.services.nginx.serviceConfig.ProtectHome = "no";
 
+  # A view of /home for nginx and Apache in which symlinks are never followed,
+  # to prevent cross-session interference.
+  fileSystems."/web-home" = {
+    device = "/home";
+    fsType = "none";
+    options = [ "bind" "nosymfollow" ];
+  };
+
   # WebDAV access to /~foo using Apache. nginx's DAV support is too incomplete.
   services.httpd = {
     enable = true;
@@ -214,7 +220,7 @@ in {
       extraConfig = ''
         RequestHeader edit Destination ^(https?://[^/]+)?/ http://127.0.0.1:8080/ early
 
-        AliasMatch "^/~(\w+)(/.*)?$" "/home/$1$2"
+        AliasMatch "^/~(\w+)(/.*)?$" "/web-home/$1$2"
 
         DavLockDB /run/httpd/DavLock
         DavMinTimeout 600
@@ -222,7 +228,7 @@ in {
         # 500 MiB
         LimitRequestBody 524288000
 
-        <Directory "/home">
+        <Directory "/web-home">
           Dav On
           # in particular no FollowSymLinks
           Options None
